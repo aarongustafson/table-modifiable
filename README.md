@@ -9,6 +9,7 @@ A web component that enables users to hide & show columns on an HTML table.
 [Live Demo](https://aarongustafson.github.io/table-modifiable/demo/) ([Source](./demo/index.html))
 
 Additional demos:
+
 - [ESM CDN Demo](https://aarongustafson.github.io/table-modifiable/demo/esm.html) ([Source](./demo/esm.html))
 - [Unpkg CDN Demo](https://aarongustafson.github.io/table-modifiable/demo/unpkg.html) ([Source](./demo/unpkg.html))
 
