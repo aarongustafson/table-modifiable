@@ -11,8 +11,80 @@
 					"description": "A web component that enables users to hide & show columns on an HTML table.",
 					"name": "TableModifiableElement",
 					"members": [],
-					"events": [],
-					"attributes": [],
+					"events": [
+						{
+							"name": "table-modifiable:change",
+							"type": {
+								"text": "CustomEvent"
+							},
+							"description": "Fired when a column's visibility is toggled",
+							"eventDetail": {
+								"type": {
+									"text": "{ column: string, visible: boolean }"
+								}
+							}
+						}
+					],
+					"attributes": [
+						{
+							"name": "removable",
+							"type": {
+								"text": "string"
+							},
+							"description": "Comma-separated list of all column names that can be shown/hidden",
+							"fieldName": "removable"
+						},
+						{
+							"name": "start-with",
+							"type": {
+								"text": "string"
+							},
+							"description": "Comma-separated list of which columns should be visible by default. If not specified, all removable columns will be shown initially",
+							"fieldName": "startWith"
+						},
+						{
+							"name": "button-label",
+							"type": {
+								"text": "string"
+							},
+							"description": "Text label for the toggle button (default: 'Modify Table')",
+							"default": "\"Modify Table\"",
+							"fieldName": "buttonLabel"
+						},
+						{
+							"name": "button-aria-label",
+							"type": {
+								"text": "string"
+							},
+							"description": "Accessible label for the toggle button. Use this to provide a more descriptive label for screen readers if needed (default: same as button-label)",
+							"fieldName": "buttonAriaLabel"
+						},
+						{
+							"name": "tools-label",
+							"type": {
+								"text": "string"
+							},
+							"description": "Heading text for the popover panel (default: 'Show/Hide Columns')",
+							"default": "\"Show/Hide Columns\"",
+							"fieldName": "toolsLabel"
+						}
+					],
+					"slots": [
+						{
+							"name": "",
+							"description": "Default slot for the table element"
+						}
+					],
+					"cssProperties": [
+						{
+							"name": "--table-modifiable-tool-bg",
+							"description": "Background color for the modification tools popover"
+						},
+						{
+							"name": "--table-modifiable-tool-color",
+							"description": "Text color for the modification tools popover"
+						}
+					],
 					"superclass": {
 						"name": "HTMLElement"
 					},
