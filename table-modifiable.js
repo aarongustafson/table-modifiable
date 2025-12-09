@@ -17,6 +17,10 @@
  * @cssprop --table-modifiable-tool-color - Text color for the modification tools
  */
 export class TableModifiableElement extends HTMLElement {
+	static _getUniqueId() {
+		return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+	}
+
 	static get observedAttributes() {
 		return [
 			'removable',
@@ -33,6 +37,8 @@ export class TableModifiableElement extends HTMLElement {
 		this._toggleButton = null;
 		this._table = null;
 		this._initialized = false;
+		this._handleChange = null;
+		this._columnIndexCache = new Map();
 	}
 
 	connectedCallback() {
@@ -77,18 +83,22 @@ export class TableModifiableElement extends HTMLElement {
 	}
 
 	_cleanup() {
-		if (this._toolsElement && this._toolsElement.parentNode) {
+		if (this._handleChange && this._toolsElement) {
 			this._toolsElement.removeEventListener(
 				'change',
 				this._handleChange,
 			);
+		}
+		if (this._toolsElement?.parentNode) {
 			this._toolsElement.remove();
 		}
-		if (this._toggleButton && this._toggleButton.parentNode) {
+		if (this._toggleButton?.parentNode) {
 			this._toggleButton.remove();
 		}
 		this._toolsElement = null;
 		this._toggleButton = null;
+		this._handleChange = null;
+		this._columnIndexCache.clear();
 		this._initialized = false;
 	}
 
@@ -98,7 +108,7 @@ export class TableModifiableElement extends HTMLElement {
 			this.getAttribute('button-aria-label') || buttonLabel;
 		const toolsLabel =
 			this.getAttribute('tools-label') || 'Show/Hide Columns';
-		const popoverId = `popover-${this._getUniqueId()}`;
+		const popoverId = `popover-${TableModifiableElement._getUniqueId()}`;
 
 		// Create the toggle button
 		const button = document.createElement('button');
@@ -120,13 +130,15 @@ export class TableModifiableElement extends HTMLElement {
 		popover.appendChild(heading);
 
 		const ul = document.createElement('ul');
+		const fragment = document.createDocumentFragment();
+		const uniqueId = TableModifiableElement._getUniqueId();
 
 		// Create checkboxes for each removable column
 		removableColumns.forEach((columnText, i) => {
 			const li = document.createElement('li');
 			const label = document.createElement('label');
 			const input = document.createElement('input');
-			const id = `column-${this._getUniqueId()}-${i}`;
+			const id = `column-${uniqueId}-${i}`;
 
 			input.type = 'checkbox';
 			input.id = id;
@@ -138,9 +150,10 @@ export class TableModifiableElement extends HTMLElement {
 			label.appendChild(document.createTextNode(' ' + columnText));
 
 			li.appendChild(label);
-			ul.appendChild(li);
+			fragment.appendChild(li);
 		});
 
+		ul.appendChild(fragment);
 		popover.appendChild(ul);
 
 		// Store bound handler for cleanup
@@ -148,18 +161,30 @@ export class TableModifiableElement extends HTMLElement {
 		popover.addEventListener('change', this._handleChange);
 
 		// Insert button and popover before the table
-		this._table.parentNode.insertBefore(button, this._table);
-		this._table.parentNode.insertBefore(popover, this._table);
+		const tableParent = this._table.parentNode;
+		tableParent.insertBefore(button, this._table);
+		tableParent.insertBefore(popover, this._table);
 
 		this._toggleButton = button;
 		this._toolsElement = popover;
 
+		// Build column index cache and trigger initial visibility
+		const headerRow = this._table.querySelector('thead tr');
+		if (headerRow) {
+			const headers = headerRow.children;
+			for (let i = 0; i < headers.length; i++) {
+				const text = headers[i].textContent.trim();
+				this._columnIndexCache.set(text, i);
+			}
+		}
+
 		// Trigger initial visibility for unchecked columns
-		ul.querySelectorAll('input[type="checkbox"]').forEach((input) => {
+		const checkboxes = ul.querySelectorAll('input[type="checkbox"]');
+		for (const input of checkboxes) {
 			if (!input.checked) {
 				this._toggleColumn(input.value, false);
 			}
-		});
+		}
 	}
 
 	_onCheckboxChange(event) {
@@ -199,42 +224,50 @@ export class TableModifiableElement extends HTMLElement {
 	}
 
 	_toggleColumn(columnText, show) {
-		// Find the header with matching text in the first header row
-		const headerRow = this._table.querySelector('thead tr');
-		if (!headerRow) {
-			console.warn('table-modifiable: No header row found');
-			return;
-		}
+		// Use cached column index if available
+		let columnIndex = this._columnIndexCache.get(columnText);
 
-		const headers = Array.from(headerRow.children);
-		let columnIndex = -1;
+		if (columnIndex === undefined) {
+			// Find the header with matching text in the first header row
+			const headerRow = this._table.querySelector('thead tr');
+			if (!headerRow) {
+				console.warn('table-modifiable: No header row found');
+				return;
+			}
 
-		for (let i = 0; i < headers.length; i++) {
-			if (headers[i].textContent.trim() === columnText) {
-				columnIndex = i;
-				break;
+			const headers = headerRow.children;
+			columnIndex = -1;
+
+			for (let i = 0; i < headers.length; i++) {
+				if (headers[i].textContent.trim() === columnText) {
+					columnIndex = i;
+					this._columnIndexCache.set(columnText, i);
+					break;
+				}
+			}
+
+			if (columnIndex === -1) {
+				console.warn(
+					`table-modifiable: Header "${columnText}" not found`,
+				);
+				return;
 			}
 		}
 
-		if (columnIndex === -1) {
-			console.warn(`table-modifiable: Header "${columnText}" not found`);
-			return;
-		}
+		const displayValue = show ? '' : 'none';
 
 		// Toggle the header cell
-		headers[columnIndex].style.display = show ? '' : 'none';
+		const headerRow = this._table.querySelector('thead tr');
+		if (headerRow?.children[columnIndex]) {
+			headerRow.children[columnIndex].style.display = displayValue;
+		}
 
 		// Toggle all cells in this column across all body rows
 		const rows = this._table.querySelectorAll('tbody tr');
-		rows.forEach((row) => {
-			const cells = Array.from(row.children);
-			if (cells[columnIndex]) {
-				cells[columnIndex].style.display = show ? '' : 'none';
+		for (const row of rows) {
+			if (row.children[columnIndex]) {
+				row.children[columnIndex].style.display = displayValue;
 			}
-		});
-	}
-
-	_getUniqueId() {
-		return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+		}
 	}
 }
