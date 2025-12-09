@@ -139,7 +139,10 @@
 			import { TableModifiableElement } from 'https://esm.sh/@aarongustafson/table-modifiable@0.0.1/table-modifiable.js?bundle&target=es2022';
 
 			if (!customElements.get('table-modifiable')) {
-				customElements.define('table-modifiable', TableModifiableElement);
+				customElements.define(
+					'table-modifiable',
+					TableModifiableElement,
+				);
 			}
 		</script>
 	</body>
