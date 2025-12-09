@@ -169,9 +169,13 @@ export class TableModifiableElement extends HTMLElement {
 
 			// Prevent unchecking if this is the last checked column
 			if (!isChecked) {
-				const allCheckboxes = this._toolsElement.querySelectorAll('input[type="checkbox"]');
-				const checkedCount = Array.from(allCheckboxes).filter(cb => cb.checked).length;
-				
+				const allCheckboxes = this._toolsElement.querySelectorAll(
+					'input[type="checkbox"]',
+				);
+				const checkedCount = Array.from(allCheckboxes).filter(
+					(cb) => cb.checked,
+				).length;
+
 				if (checkedCount === 0) {
 					// Revert the checkbox state
 					event.target.checked = true;
