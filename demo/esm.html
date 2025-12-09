@@ -3,10 +3,99 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<title>COMPONENT-NAME via esm.sh</title>
+		<title>table-modifiable via esm.sh</title>
 		<link rel="stylesheet" href="./styles.css" />
 		<style>
 			/* Demo-specific styles */
+			table {
+				width: 100%;
+				border-collapse: collapse;
+				margin-top: 1rem;
+			}
+
+			th,
+			td {
+				border: 1px solid #ddd;
+				padding: 0.75rem;
+				text-align: left;
+			}
+
+			th {
+				background-color: #f5f5f5;
+				color: #222;
+				font-weight: bold;
+			}
+
+			tbody tr:nth-child(even) {
+				background-color: #fafafa;
+				color: #222;
+			}
+
+			/* Button styles */
+			.modification-tools-toggle {
+				background: #0969da;
+				color: white;
+				border: none;
+				padding: 0.5rem 1rem;
+				border-radius: 4px;
+				font-size: 1rem;
+				cursor: pointer;
+				margin-bottom: 1rem;
+			}
+
+			.modification-tools-toggle:hover {
+				background: #0860ca;
+			}
+
+			/* Popover styles */
+			.modification-tools {
+				background: white;
+				color: #333;
+				padding: 1rem;
+				border-radius: 6px;
+				border: 1px solid #d0d7de;
+				box-shadow: 0 8px 24px rgba(140, 149, 159, 0.2);
+				min-width: 250px;
+			}
+
+			.modification-tools-heading {
+				font-weight: bold;
+				display: block;
+				margin-bottom: 0.75rem;
+				font-size: 1.1rem;
+				color: #24292f;
+			}
+
+			.modification-tools ul {
+				list-style: none;
+				padding: 0;
+				margin: 0;
+				display: flex;
+				flex-direction: column;
+				gap: 0.5rem;
+			}
+
+			.modification-tools li {
+				margin: 0;
+			}
+
+			.modification-tools label {
+				cursor: pointer;
+				user-select: none;
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+				padding: 0.25rem;
+			}
+
+			.modification-tools label:hover {
+				background: #f6f8fa;
+				border-radius: 3px;
+			}
+
+			.modification-tools input[type='checkbox'] {
+				cursor: pointer;
+			}
 		</style>
 	</head>
 	<body>
@@ -16,15 +105,41 @@
 			registers it manually.
 		</p>
 
-		<COMPONENT-NAME>
-			<p>Replace this markup once you customize COMPONENT-NAME.</p>
-		</COMPONENT-NAME>
+		<h2>Basic Example</h2>
+		<table-modifiable removable="Name,Email,Phone">
+			<table>
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th>Email</th>
+						<th>Phone</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>John Doe</td>
+						<td>john@example.com</td>
+						<td>555-1234</td>
+					</tr>
+					<tr>
+						<td>Jane Smith</td>
+						<td>jane@example.com</td>
+						<td>555-5678</td>
+					</tr>
+					<tr>
+						<td>Bob Johnson</td>
+						<td>bob@example.com</td>
+						<td>555-9012</td>
+					</tr>
+				</tbody>
+			</table>
+		</table-modifiable>
 
 		<script type="module">
-			import { ComponentNameElement } from 'https://esm.sh/@aarongustafson/COMPONENT-NAME@0.0.1/COMPONENT-NAME.js?bundle&target=es2022';
+			import { TableModifiableElement } from 'https://esm.sh/@aarongustafson/table-modifiable@0.0.1/table-modifiable.js?bundle&target=es2022';
 
-			if (!customElements.get('COMPONENT-NAME')) {
-				customElements.define('COMPONENT-NAME', ComponentNameElement);
+			if (!customElements.get('table-modifiable')) {
+				customElements.define('table-modifiable', TableModifiableElement);
 			}
 		</script>
 	</body>
