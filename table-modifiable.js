@@ -1,17 +1,17 @@
 /**
- * ComponentNameElement - COMPONENT_DESCRIPTION
+ * TableModifiableElement - A web component that enables users to hide & show columns on an HTML table.
  *
- * @element COMPONENT-NAME
+ * @element table-modifiable
  *
  * @attr {string} example-attribute - Description of the attribute
  *
- * @fires COMPONENT-NAME:event-name - Description of the event
+ * @fires table-modifiable:event-name - Description of the event
  *
  * @slot - Default slot for content
  *
  * @cssprop --component-name-color - Description of CSS custom property
  */
-export class ComponentNameElement extends HTMLElement {
+export class TableModifiableElement extends HTMLElement {
 	static get observedAttributes() {
 		return ['example-attribute'];
 	}

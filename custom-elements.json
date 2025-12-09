@@ -4,29 +4,29 @@
 	"modules": [
 		{
 			"kind": "javascript-module",
-			"path": "COMPONENT-NAME.js",
+			"path": "table-modifiable.js",
 			"declarations": [
 				{
 					"kind": "class",
-					"description": "COMPONENT_DESCRIPTION",
-					"name": "ComponentNameElement",
+					"description": "A web component that enables users to hide & show columns on an HTML table.",
+					"name": "TableModifiableElement",
 					"members": [],
 					"events": [],
 					"attributes": [],
 					"superclass": {
 						"name": "HTMLElement"
 					},
-					"tagName": "COMPONENT-NAME",
+					"tagName": "table-modifiable",
 					"customElement": true
 				}
 			],
 			"exports": [
 				{
 					"kind": "js",
-					"name": "ComponentNameElement",
+					"name": "TableModifiableElement",
 					"declaration": {
-						"name": "ComponentNameElement",
-						"module": "COMPONENT-NAME.js"
+						"name": "TableModifiableElement",
+						"module": "table-modifiable.js"
 					}
 				}
 			]

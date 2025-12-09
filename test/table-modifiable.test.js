@@ -1,20 +1,20 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ComponentNameElement } from '../COMPONENT-NAME.js';
+import { TableModifiableElement } from '../table-modifiable.js';
 
-describe('ComponentNameElement', () => {
+describe('TableModifiableElement', () => {
 	let element;
 
 	beforeEach(() => {
-		element = document.createElement('COMPONENT-NAME');
+		element = document.createElement('table-modifiable');
 		document.body.appendChild(element);
 	});
 
 	it('should be defined', () => {
-		expect(customElements.get('COMPONENT-NAME')).toBe(ComponentNameElement);
+		expect(customElements.get('table-modifiable')).toBe(TableModifiableElement);
 	});
 
 	it('should create an instance', () => {
-		expect(element).toBeInstanceOf(ComponentNameElement);
+		expect(element).toBeInstanceOf(TableModifiableElement);
 		expect(element).toBeInstanceOf(HTMLElement);
 	});
 

@@ -1,7 +1,7 @@
 {
-	"name": "@aarongustafson/COMPONENT-NAME",
+	"name": "@aarongustafson/table-modifiable",
 	"version": "0.0.1",
-	"description": "COMPONENT_DESCRIPTION",
+	"description": "A web component that enables users to hide & show columns on an HTML table.",
 	"keywords": [
 		"html",
 		"custom element",
@@ -9,24 +9,24 @@
 	],
 	"author": "Aaron Gustafson <aaron@easy-designs.net> (https://www.aaron-gustafson.com/)",
 	"license": "MIT",
-	"homepage": "https://github.com/aarongustafson/COMPONENT-NAME#readme",
+	"homepage": "https://github.com/aarongustafson/table-modifiable#readme",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/aarongustafson/COMPONENT-NAME.git"
+		"url": "git+https://github.com/aarongustafson/table-modifiable.git"
 	},
 	"bugs": {
-		"url": "https://github.com/aarongustafson/COMPONENT-NAME/issues"
+		"url": "https://github.com/aarongustafson/table-modifiable/issues"
 	},
 	"type": "module",
 	"main": "index.js",
-	"module": "COMPONENT-NAME.js",
+	"module": "table-modifiable.js",
 	"customElements": "custom-elements.json",
 	"exports": {
 		".": {
 			"import": "./index.js"
 		},
-		"./COMPONENT-NAME.js": {
-			"import": "./COMPONENT-NAME.js"
+		"./table-modifiable.js": {
+			"import": "./table-modifiable.js"
 		},
 		"./define.js": {
 			"import": "./define.js"
@@ -34,7 +34,7 @@
 		"./custom-elements.json": "./custom-elements.json"
 	},
 	"files": [
-		"COMPONENT-NAME.js",
+		"table-modifiable.js",
 		"define.js",
 		"index.js",
 		"custom-elements.json",
