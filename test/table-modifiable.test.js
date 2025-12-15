@@ -1,6 +1,18 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TableModifiableElement } from '../table-modifiable.js';
 
+const waitForInitialization = async () => {
+	await new Promise((resolve) => setTimeout(resolve, 0));
+	await new Promise((resolve) => {
+		if (typeof globalThis.requestAnimationFrame === 'function') {
+			globalThis.requestAnimationFrame(resolve);
+			return;
+		}
+		setTimeout(resolve, 0);
+	});
+	await new Promise((resolve) => setTimeout(resolve, 0));
+};
+
 describe('TableModifiableElement', () => {
 	let element;
 
@@ -35,6 +47,55 @@ describe('TableModifiableElement', () => {
 		expect(element.shadowRoot).toBeFalsy();
 	});
 
+	describe('properties', () => {
+		it('should reflect removable attribute via property', () => {
+			element.removable = 'Name,Email';
+			expect(element.getAttribute('removable')).toBe('Name,Email');
+			element.removable = null;
+			expect(element.hasAttribute('removable')).toBe(false);
+		});
+
+		it('should reflect start-with attribute via property', () => {
+			element.startWith = 'Name';
+			expect(element.getAttribute('start-with')).toBe('Name');
+			element.startWith = '';
+			expect(element.hasAttribute('start-with')).toBe(false);
+		});
+
+		it('should reflect label attributes via properties', () => {
+			element.buttonLabel = 'Customize';
+			element.buttonAriaLabel = 'Customize columns';
+			element.toolsLabel = 'Pick Columns';
+			expect(element.getAttribute('button-label')).toBe('Customize');
+			expect(element.getAttribute('button-aria-label')).toBe(
+				'Customize columns',
+			);
+			expect(element.getAttribute('tools-label')).toBe('Pick Columns');
+		});
+
+		it('should upgrade properties set before connecting', async () => {
+			const preConnected = document.createElement('table-modifiable');
+			preConnected.removable = 'Name';
+			preConnected.startWith = 'Name';
+			preConnected.innerHTML = `
+				<table>
+					<thead>
+						<tr>
+							<th>Name</th>
+						</tr>
+					</thead>
+				</table>
+			`;
+			document.body.appendChild(preConnected);
+			await waitForInitialization();
+			const checkboxes = preConnected.querySelectorAll(
+				'.modification-tools input[type="checkbox"]',
+			);
+			expect(checkboxes.length).toBe(1);
+			preConnected.remove();
+		});
+	});
+
 	it('should render modification tools when table and removable attribute are present', async () => {
 		element.setAttribute('removable', 'Name,Email');
 		element.innerHTML = `
@@ -55,13 +116,77 @@ describe('TableModifiableElement', () => {
 		`;
 
 		// Wait for initialization
-		await new Promise((resolve) => setTimeout(resolve, 10));
+		await waitForInitialization();
 
 		const button = element.querySelector('.modification-tools-toggle');
 		const popover = element.querySelector('.modification-tools');
 		expect(button).toBeTruthy();
 		expect(popover).toBeTruthy();
 		expect(popover.getAttribute('popover')).toBe('auto');
+	});
+
+	it('should initialize when table is added after connection', async () => {
+		element.setAttribute('removable', 'Name');
+		await waitForInitialization();
+		expect(element.querySelector('.modification-tools')).toBeFalsy();
+
+		element.innerHTML = `
+			<table>
+				<thead>
+					<tr>
+						<th>Name</th>
+					</tr>
+				</thead>
+			</table>
+		`;
+
+		await waitForInitialization();
+		expect(element.querySelector('.modification-tools')).toBeTruthy();
+	});
+
+	it('should cleanup tools when table is removed but component stays connected', async () => {
+		element.setAttribute('removable', 'Name');
+		element.innerHTML = `
+			<table>
+				<thead>
+					<tr>
+						<th>Name</th>
+					</tr>
+				</thead>
+			</table>
+		`;
+		await waitForInitialization();
+		expect(element.querySelector('.modification-tools')).toBeTruthy();
+
+		element.innerHTML = '';
+		await waitForInitialization();
+		expect(element.querySelector('.modification-tools')).toBeFalsy();
+	});
+
+	it('should rebuild controls when removable attribute changes', async () => {
+		element.setAttribute('removable', 'Name');
+		element.innerHTML = `
+			<table>
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th>Email</th>
+					</tr>
+				</thead>
+			</table>
+		`;
+		await waitForInitialization();
+		let checkboxes = element.querySelectorAll(
+			'.modification-tools input[type="checkbox"]',
+		);
+		expect(checkboxes.length).toBe(1);
+
+		element.setAttribute('removable', 'Name,Email');
+		await waitForInitialization();
+		checkboxes = element.querySelectorAll(
+			'.modification-tools input[type="checkbox"]',
+		);
+		expect(checkboxes.length).toBe(2);
 	});
 
 	it('should create checkboxes for each removable column', async () => {
@@ -78,7 +203,7 @@ describe('TableModifiableElement', () => {
 			</table>
 		`;
 
-		await new Promise((resolve) => setTimeout(resolve, 10));
+		await waitForInitialization();
 
 		const checkboxes = element.querySelectorAll(
 			'.modification-tools input[type="checkbox"]',
@@ -102,7 +227,7 @@ describe('TableModifiableElement', () => {
 			</table>
 		`;
 
-		await new Promise((resolve) => setTimeout(resolve, 10));
+		await waitForInitialization();
 
 		const checkboxes = element.querySelectorAll(
 			'.modification-tools input[type="checkbox"]',
@@ -127,7 +252,7 @@ describe('TableModifiableElement', () => {
 			</table>
 		`;
 
-		await new Promise((resolve) => setTimeout(resolve, 10));
+		await waitForInitialization();
 
 		const checkboxes = element.querySelectorAll(
 			'.modification-tools input[type="checkbox"]',
@@ -159,7 +284,7 @@ describe('TableModifiableElement', () => {
 			</table>
 		`;
 
-		await new Promise((resolve) => setTimeout(resolve, 10));
+		await waitForInitialization();
 
 		const table = element.querySelector('table');
 		const emailHeader = table.querySelectorAll('th')[1];
@@ -192,7 +317,7 @@ describe('TableModifiableElement', () => {
 			</table>
 		`;
 
-		await new Promise((resolve) => setTimeout(resolve, 10));
+		await waitForInitialization();
 
 		const table = element.querySelector('table');
 		const checkboxes = element.querySelectorAll(
@@ -234,7 +359,7 @@ describe('TableModifiableElement', () => {
 			</table>
 		`;
 
-		await new Promise((resolve) => setTimeout(resolve, 10));
+		await waitForInitialization();
 
 		const eventHandler = vi.fn();
 		element.addEventListener('table-modifiable:change', eventHandler);
@@ -284,7 +409,7 @@ describe('TableModifiableElement', () => {
 			</table>
 		`;
 
-		await new Promise((resolve) => setTimeout(resolve, 10));
+		await waitForInitialization();
 
 		const table = element.querySelector('table');
 		const headerRow = table.querySelector('thead tr');
@@ -326,7 +451,7 @@ describe('TableModifiableElement', () => {
 		element.setAttribute('removable', 'Name,Email');
 		// No table in element
 
-		await new Promise((resolve) => setTimeout(resolve, 10));
+		await waitForInitialization();
 
 		expect(consoleWarnSpy).toHaveBeenCalledWith(
 			'table-modifiable: No table element found',
@@ -350,7 +475,7 @@ describe('TableModifiableElement', () => {
 			</table>
 		`;
 
-		await new Promise((resolve) => setTimeout(resolve, 10));
+		await waitForInitialization();
 
 		expect(consoleWarnSpy).toHaveBeenCalledWith(
 			'table-modifiable: No removable attribute specified',
@@ -372,7 +497,7 @@ describe('TableModifiableElement', () => {
 			</table>
 		`;
 
-		await new Promise((resolve) => setTimeout(resolve, 10));
+		await waitForInitialization();
 
 		expect(element.querySelector('.modification-tools')).toBeTruthy();
 
@@ -395,7 +520,7 @@ describe('TableModifiableElement', () => {
 			</table>
 		`;
 
-		await new Promise((resolve) => setTimeout(resolve, 10));
+		await waitForInitialization();
 
 		const button = element.querySelector('.modification-tools-toggle');
 		expect(button.textContent).toBe('Modify Table');
@@ -417,13 +542,37 @@ describe('TableModifiableElement', () => {
 			</table>
 		`;
 
-		await new Promise((resolve) => setTimeout(resolve, 10));
+		await waitForInitialization();
 
 		const button = element.querySelector('.modification-tools-toggle');
 		expect(button.textContent).toBe('Customize');
 		expect(button.getAttribute('aria-label')).toBe(
 			'Customize table columns',
 		);
+	});
+
+	it('should use property-set labels when provided', async () => {
+		element.buttonLabel = 'Property Customize';
+		element.buttonAriaLabel = 'Property customize aria';
+		element.toolsLabel = 'Property Tools';
+		element.setAttribute('removable', 'Name');
+		element.innerHTML = `
+			<table>
+				<thead>
+					<tr>
+						<th>Name</th>
+					</tr>
+				</thead>
+			</table>
+		`;
+		await waitForInitialization();
+		const button = element.querySelector('.modification-tools-toggle');
+		const heading = element.querySelector('.modification-tools-heading');
+		expect(button.textContent).toBe('Property Customize');
+		expect(button.getAttribute('aria-label')).toBe(
+			'Property customize aria',
+		);
+		expect(heading.textContent).toBe('Property Tools');
 	});
 
 	it('should use custom tools label when specified', async () => {
@@ -440,7 +589,7 @@ describe('TableModifiableElement', () => {
 			</table>
 		`;
 
-		await new Promise((resolve) => setTimeout(resolve, 10));
+		await waitForInitialization();
 
 		const heading = element.querySelector('.modification-tools-heading');
 		expect(heading.textContent).toBe('Select Columns');
@@ -459,7 +608,7 @@ describe('TableModifiableElement', () => {
 			</table>
 		`;
 
-		await new Promise((resolve) => setTimeout(resolve, 10));
+		await waitForInitialization();
 
 		const heading = element.querySelector('.modification-tools-heading');
 		expect(heading.textContent).toBe('Show/Hide Columns');
@@ -487,7 +636,7 @@ describe('TableModifiableElement', () => {
 			</table>
 		`;
 
-		await new Promise((resolve) => setTimeout(resolve, 10));
+		await waitForInitialization();
 
 		const checkboxes = element.querySelectorAll(
 			'.modification-tools input[type="checkbox"]',
@@ -526,7 +675,7 @@ describe('TableModifiableElement', () => {
 			</table>
 		`;
 
-		await new Promise((resolve) => setTimeout(resolve, 10));
+		await waitForInitialization();
 
 		const checkboxes = element.querySelectorAll(
 			'.modification-tools input[type="checkbox"]',
