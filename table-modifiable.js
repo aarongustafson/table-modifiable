@@ -1,3 +1,18 @@
+const TABLE_STRUCTURE_TAGS = new Set([
+	'TABLE',
+	'CAPTION',
+	'COLGROUP',
+	'COL',
+	'THEAD',
+	'TBODY',
+	'TFOOT',
+	'TR',
+	'TH',
+	'TD',
+]);
+
+const CONTROL_DATA_ATTRIBUTE = 'data-table-modifiable-control';
+
 /**
  * TableModifiableElement - A web component that enables users to hide & show columns on an HTML table.
  *
@@ -29,6 +44,25 @@ export class TableModifiableElement extends HTMLElement {
 			.split(',')
 			.map((s) => s.trim())
 			.filter(Boolean);
+	}
+
+	static _isTableStructureNode(node) {
+		return (
+			node instanceof Element && TABLE_STRUCTURE_TAGS.has(node.tagName)
+		);
+	}
+
+	static _isGeneratedControlNode(node) {
+		if (!(node instanceof Element)) {
+			return false;
+		}
+		if (node.hasAttribute(CONTROL_DATA_ATTRIBUTE)) {
+			return true;
+		}
+		return (
+			node.classList.contains('modification-tools') ||
+			node.classList.contains('modification-tools-toggle')
+		);
 	}
 
 	static get observedAttributes() {
@@ -192,12 +226,14 @@ export class TableModifiableElement extends HTMLElement {
 		button.textContent = buttonLabel;
 		button.setAttribute('aria-label', buttonAriaLabel);
 		button.setAttribute('popovertarget', popoverId);
+		button.setAttribute(CONTROL_DATA_ATTRIBUTE, 'true');
 
 		// Create the popover container
 		const popover = document.createElement('div');
 		popover.id = popoverId;
 		popover.className = 'modification-tools';
 		popover.setAttribute('popover', 'auto');
+		popover.setAttribute(CONTROL_DATA_ATTRIBUTE, 'true');
 
 		const heading = document.createElement('span');
 		heading.className = 'modification-tools-heading';
@@ -383,7 +419,10 @@ export class TableModifiableElement extends HTMLElement {
 				return;
 			}
 			for (const mutation of mutations) {
-				if (mutation.type === 'childList') {
+				if (
+					mutation.type === 'childList' &&
+					this._mutationTouchesTable(mutation)
+				) {
 					this._scheduleInitialization();
 					return;
 				}
@@ -419,6 +458,28 @@ export class TableModifiableElement extends HTMLElement {
 			return;
 		}
 		this.setAttribute(attrName, String(value));
+	}
+
+	_mutationTouchesTable(mutation) {
+		if (TableModifiableElement._isTableStructureNode(mutation.target)) {
+			return true;
+		}
+
+		const nodes = [
+			...mutation.addedNodes,
+			...mutation.removedNodes,
+		];
+
+		for (const node of nodes) {
+			if (TableModifiableElement._isGeneratedControlNode(node)) {
+				continue;
+			}
+			if (TableModifiableElement._isTableStructureNode(node)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	_upgradeProperty(prop) {
