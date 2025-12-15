@@ -21,6 +21,7 @@
 	"main": "index.js",
 	"module": "table-modifiable.js",
 	"customElements": "custom-elements.json",
+	"types": "table-modifiable.d.ts",
 	"exports": {
 		".": {
 			"import": "./index.js"
