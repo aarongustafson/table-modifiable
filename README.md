@@ -45,6 +45,14 @@ import { TableModifiableElement } from '@aarongustafson/table-modifiable/table-m
 customElements.define('my-custom-name', TableModifiableElement);
 ```
 
+You can also call the provided helper to register the element without importing the class:
+
+```javascript
+import { defineTableModifiable } from '@aarongustafson/table-modifiable/define.js';
+
+defineTableModifiable('my-custom-name');
+```
+
 ### Basic Example
 
 ```html
@@ -77,6 +85,16 @@ customElements.define('my-custom-name', TableModifiableElement);
 | `button-label` | `string` | `"Modify Table"` | Text label for the toggle button |
 | `button-aria-label` | `string` | (same as button-label) | Accessible label for the toggle button. Use this to provide a more descriptive label for screen readers if needed |
 | `tools-label` | `string` | `"Show/Hide Columns"` | Heading text for the popover panel |
+
+## Properties
+
+All of the attributes above have matching camelCase properties (`removable`, `startWith`, `buttonLabel`, `buttonAriaLabel`, `toolsLabel`). Setting a property updates the corresponding attribute and schedules the component to re-render.
+
+```javascript
+const modifiable = document.querySelector('table-modifiable');
+modifiable.removable = 'Name,Email';
+modifiable.startWith = 'Name';
+```
 
 ## Events
 
@@ -231,6 +249,29 @@ This component wraps an HTML table and adds interactive controls to show/hide co
     </tbody>
   </table>
 </table-modifiable>
+```
+
+## TypeScript
+
+This package ships bundled type definitions (`table-modifiable.d.ts`). You can import the element type, the change event payload, and the registration helper:
+
+```ts
+import type {
+  TableModifiableElement,
+  TableModifiableChangeEvent,
+} from '@aarongustafson/table-modifiable/table-modifiable.js';
+import { defineTableModifiable } from '@aarongustafson/table-modifiable/define.js';
+
+defineTableModifiable();
+
+const element = document.querySelector('table-modifiable') as TableModifiableElement;
+
+element.addEventListener(
+  'table-modifiable:change',
+  (event: TableModifiableChangeEvent) => {
+    console.log(event.detail.column, event.detail.visible);
+  },
+);
 ```
 
 ## Browser Support
