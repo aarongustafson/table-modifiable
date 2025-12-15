@@ -21,6 +21,16 @@ export class TableModifiableElement extends HTMLElement {
 		return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 	}
 
+	static _parseColumns(value) {
+		if (!value) {
+			return [];
+		}
+		return value
+			.split(',')
+			.map((s) => s.trim())
+			.filter(Boolean);
+	}
+
 	static get observedAttributes() {
 		return [
 			'removable',
@@ -39,22 +49,78 @@ export class TableModifiableElement extends HTMLElement {
 		this._initialized = false;
 		this._handleChange = null;
 		this._columnIndexCache = new Map();
+		this._pendingInitFrame = null;
+		this._mutationObserver = null;
+		this._suppressMutationObserver = false;
 	}
 
 	connectedCallback() {
-		// Wait for next tick to ensure table is in the DOM
-		setTimeout(() => this._initialize(), 0);
+		this._upgradeProperty('removable');
+		this._upgradeProperty('startWith');
+		this._upgradeProperty('buttonLabel');
+		this._upgradeProperty('buttonAriaLabel');
+		this._upgradeProperty('toolsLabel');
+
+		this._setupMutationObserver();
+		this._scheduleInitialization();
 	}
 
 	disconnectedCallback() {
-		this._cleanup();
+		this._teardownMutationObserver();
+		if (this._pendingInitFrame !== null) {
+			cancelAnimationFrame(this._pendingInitFrame);
+			this._pendingInitFrame = null;
+		}
+		this._withMutationSuppressed(() => {
+			this._cleanup();
+		});
 	}
 
 	attributeChangedCallback(name, oldValue, newValue) {
-		if (oldValue !== newValue && this._initialized) {
-			this._cleanup();
-			this._initialize();
+		if (oldValue === newValue) {
+			return;
 		}
+		this._scheduleInitialization();
+	}
+
+	get removable() {
+		return this.getAttribute('removable');
+	}
+
+	set removable(value) {
+		this._reflectStringAttribute('removable', value);
+	}
+
+	get startWith() {
+		return this.getAttribute('start-with');
+	}
+
+	set startWith(value) {
+		this._reflectStringAttribute('start-with', value);
+	}
+
+	get buttonLabel() {
+		return this.getAttribute('button-label');
+	}
+
+	set buttonLabel(value) {
+		this._reflectStringAttribute('button-label', value);
+	}
+
+	get buttonAriaLabel() {
+		return this.getAttribute('button-aria-label');
+	}
+
+	set buttonAriaLabel(value) {
+		this._reflectStringAttribute('button-aria-label', value);
+	}
+
+	get toolsLabel() {
+		return this.getAttribute('tools-label');
+	}
+
+	set toolsLabel(value) {
+		this._reflectStringAttribute('tools-label', value);
 	}
 
 	_initialize() {
@@ -73,10 +139,18 @@ export class TableModifiableElement extends HTMLElement {
 			return;
 		}
 
-		const removableColumns = removable.split(',').map((s) => s.trim());
+		const removableColumns =
+			TableModifiableElement._parseColumns(removable);
+		if (removableColumns.length === 0) {
+			console.warn('table-modifiable: No columns specified in removable');
+			return;
+		}
 		const startWithColumns = startWith
-			? startWith.split(',').map((s) => s.trim())
+			? TableModifiableElement._parseColumns(startWith)
 			: removableColumns;
+		if (startWithColumns.length === 0) {
+			startWithColumns.push(removableColumns[0]);
+		}
 
 		this._createTools(removableColumns, startWithColumns);
 		this._initialized = true;
@@ -99,6 +173,7 @@ export class TableModifiableElement extends HTMLElement {
 		this._toggleButton = null;
 		this._handleChange = null;
 		this._columnIndexCache.clear();
+		this._table = null;
 		this._initialized = false;
 	}
 
@@ -162,8 +237,14 @@ export class TableModifiableElement extends HTMLElement {
 
 		// Insert button and popover before the table
 		const tableParent = this._table.parentNode;
-		tableParent.insertBefore(button, this._table);
-		tableParent.insertBefore(popover, this._table);
+		if (!tableParent) {
+			console.warn('table-modifiable: Table has no parent node');
+			return;
+		}
+		const controlsFragment = document.createDocumentFragment();
+		controlsFragment.appendChild(button);
+		controlsFragment.appendChild(popover);
+		tableParent.insertBefore(controlsFragment, this._table);
 
 		this._toggleButton = button;
 		this._toolsElement = popover;
@@ -224,6 +305,9 @@ export class TableModifiableElement extends HTMLElement {
 	}
 
 	_toggleColumn(columnText, show) {
+		if (!this._table) {
+			return;
+		}
 		// Use cached column index if available
 		let columnIndex = this._columnIndexCache.get(columnText);
 
@@ -268,6 +352,80 @@ export class TableModifiableElement extends HTMLElement {
 			if (row.children[columnIndex]) {
 				row.children[columnIndex].style.display = displayValue;
 			}
+		}
+	}
+
+	_scheduleInitialization() {
+		if (!this.isConnected) {
+			return;
+		}
+
+		if (this._pendingInitFrame !== null) {
+			cancelAnimationFrame(this._pendingInitFrame);
+		}
+
+		this._pendingInitFrame = requestAnimationFrame(() => {
+			this._pendingInitFrame = null;
+			this._withMutationSuppressed(() => {
+				this._cleanup();
+				this._initialize();
+			});
+		});
+	}
+
+	_setupMutationObserver() {
+		if (this._mutationObserver) {
+			this._mutationObserver.disconnect();
+		}
+
+		this._mutationObserver = new MutationObserver((mutations) => {
+			if (this._suppressMutationObserver) {
+				return;
+			}
+			for (const mutation of mutations) {
+				if (mutation.type === 'childList') {
+					this._scheduleInitialization();
+					return;
+				}
+			}
+		});
+
+		this._mutationObserver.observe(this, {
+			childList: true,
+			subtree: true,
+		});
+	}
+
+	_teardownMutationObserver() {
+		if (this._mutationObserver) {
+			this._mutationObserver.disconnect();
+			this._mutationObserver = null;
+		}
+	}
+
+	_withMutationSuppressed(callback) {
+		const wasSuppressed = this._suppressMutationObserver;
+		this._suppressMutationObserver = true;
+		try {
+			callback();
+		} finally {
+			this._suppressMutationObserver = wasSuppressed;
+		}
+	}
+
+	_reflectStringAttribute(attrName, value) {
+		if (value === null || value === undefined || value === '') {
+			this.removeAttribute(attrName);
+			return;
+		}
+		this.setAttribute(attrName, String(value));
+	}
+
+	_upgradeProperty(prop) {
+		if (Object.prototype.hasOwnProperty.call(this, prop)) {
+			const value = this[prop];
+			delete this[prop];
+			this[prop] = value;
 		}
 	}
 }
