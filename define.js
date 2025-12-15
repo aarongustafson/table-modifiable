@@ -1,6 +1,6 @@
 import { TableModifiableElement } from './table-modifiable.js';
 
-export function defineComponentName(tagName = 'table-modifiable') {
+export function defineTableModifiable(tagName = 'table-modifiable') {
 	const hasWindow = typeof window !== 'undefined';
 	const registry = hasWindow ? window.customElements : undefined;
 
@@ -15,4 +15,8 @@ export function defineComponentName(tagName = 'table-modifiable') {
 	return true;
 }
 
-defineComponentName();
+export function defineComponentName(tagName = 'table-modifiable') {
+	return defineTableModifiable(tagName);
+}
+
+defineTableModifiable();
