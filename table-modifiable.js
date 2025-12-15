@@ -32,6 +32,25 @@ const CONTROL_DATA_ATTRIBUTE = 'data-table-modifiable-control';
  * @cssprop --table-modifiable-tool-color - Text color for the modification tools
  */
 export class TableModifiableElement extends HTMLElement {
+	static _mutationTouchesTable(mutation) {
+		if (TableModifiableElement._isTableStructureNode(mutation.target)) {
+			return true;
+		}
+
+		const nodes = [...mutation.addedNodes, ...mutation.removedNodes];
+
+		for (const node of nodes) {
+			if (TableModifiableElement._isGeneratedControlNode(node)) {
+				continue;
+			}
+			if (TableModifiableElement._isTableStructureNode(node)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	static _getUniqueId() {
 		return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 	}
@@ -421,7 +440,7 @@ export class TableModifiableElement extends HTMLElement {
 			for (const mutation of mutations) {
 				if (
 					mutation.type === 'childList' &&
-					this._mutationTouchesTable(mutation)
+					TableModifiableElement._mutationTouchesTable(mutation)
 				) {
 					this._scheduleInitialization();
 					return;
@@ -458,28 +477,6 @@ export class TableModifiableElement extends HTMLElement {
 			return;
 		}
 		this.setAttribute(attrName, String(value));
-	}
-
-	_mutationTouchesTable(mutation) {
-		if (TableModifiableElement._isTableStructureNode(mutation.target)) {
-			return true;
-		}
-
-		const nodes = [
-			...mutation.addedNodes,
-			...mutation.removedNodes,
-		];
-
-		for (const node of nodes) {
-			if (TableModifiableElement._isGeneratedControlNode(node)) {
-				continue;
-			}
-			if (TableModifiableElement._isTableStructureNode(node)) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	_upgradeProperty(prop) {
