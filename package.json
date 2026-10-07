@@ -24,11 +24,12 @@
 	"types": "table-modifiable.d.ts",
 	"exports": {
 		".": {
+			"types": "./table-modifiable.d.ts",
 			"import": "./index.js"
 		},
 		"./table-modifiable.js": {
-			"import": "./table-modifiable.js",
-			"types": "./table-modifiable.d.ts"
+			"types": "./table-modifiable.d.ts",
+			"import": "./table-modifiable.js"
 		},
 		"./define.js": {
 			"import": "./define.js"
@@ -45,10 +46,9 @@
 		"LICENSE"
 	],
 	"engines": {
-		"node": ">=20.0.0"
+		"node": ">=22.0.0"
 	},
 	"scripts": {
-		"setup": "node scripts/setup.js",
 		"test": "vitest",
 		"test:ui": "vitest --ui",
 		"test:run": "vitest run",
