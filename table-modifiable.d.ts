@@ -14,9 +14,6 @@ export declare class TableModifiableElement extends HTMLElement {
 	toolsLabel: string | null;
 }
 
-export declare function defineTableModifiable(tagName?: string): boolean;
-export declare function defineComponentName(tagName?: string): boolean;
-
 declare global {
 	interface HTMLElementTagNameMap {
 		'table-modifiable': TableModifiableElement;
