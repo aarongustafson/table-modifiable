@@ -1,6 +1,5 @@
 {
 	"schemaVersion": "1.0.0",
-	"readme": "",
 	"modules": [
 		{
 			"kind": "javascript-module",
@@ -8,21 +7,57 @@
 			"declarations": [
 				{
 					"kind": "class",
-					"description": "A web component that enables users to hide & show columns on an HTML table.",
+					"description": "Enhances the first light-DOM table with native popover controls for column visibility. Configure exact first-header-row names before initialization. The component injects no CSS. Attribute and structural child-list changes rebuild controls; previous hidden cell styles are not restored during cleanup. Disconnecting cancels initialization, disconnects the observer, and removes controls and their listener.",
 					"name": "TableModifiableElement",
-					"members": [],
+					"members": [
+						{
+							"kind": "field",
+							"name": "removable",
+							"type": { "text": "string | null" },
+							"attribute": "removable",
+							"reflects": true,
+							"description": "Required comma-separated exact first-header-row names. Missing or empty values leave the table unenhanced and emit a warning."
+						},
+						{
+							"kind": "field",
+							"name": "startWith",
+							"type": { "text": "string | null" },
+							"attribute": "start-with",
+							"reflects": true,
+							"description": "Initially visible removable columns. Missing or empty attributes show all removable columns. Use valid matching names; unknown names can hide all removable columns."
+						},
+						{
+							"kind": "field",
+							"name": "buttonLabel",
+							"type": { "text": "string | null" },
+							"attribute": "button-label",
+							"reflects": true,
+							"description": "Visible toggle label; missing or empty attributes use Modify Table."
+						},
+						{
+							"kind": "field",
+							"name": "buttonAriaLabel",
+							"type": { "text": "string | null" },
+							"attribute": "button-aria-label",
+							"reflects": true,
+							"description": "Accessible toggle label; missing or empty values use button-label or its default. Include the visible label in a longer accessible name."
+						},
+						{
+							"kind": "field",
+							"name": "toolsLabel",
+							"type": { "text": "string | null" },
+							"attribute": "tools-label",
+							"reflects": true,
+							"description": "Visible panel label; missing or empty values use Show/Hide Columns."
+						}
+					],
 					"events": [
 						{
 							"name": "table-modifiable:change",
 							"type": {
-								"text": "CustomEvent"
+								"text": "CustomEvent<{ column: string, visible: boolean }>"
 							},
-							"description": "Fired when a column's visibility is toggled",
-							"eventDetail": {
-								"type": {
-									"text": "{ column: string, visible: boolean }"
-								}
-							}
+							"description": "Bubbles after an accepted checkbox visibility change. Initial hiding and rejected last-checkbox changes do not emit this event."
 						}
 					],
 					"attributes": [
@@ -69,20 +104,14 @@
 							"fieldName": "toolsLabel"
 						}
 					],
-					"slots": [
-						{
-							"name": "",
-							"description": "Default slot for the table element"
-						}
-					],
 					"cssProperties": [
 						{
 							"name": "--table-modifiable-tool-bg",
-							"description": "Background color for the modification tools popover"
+							"description": "Author-stylesheet hook used by the demo popover styles. Pair with --table-modifiable-tool-color. The component itself injects no CSS."
 						},
 						{
 							"name": "--table-modifiable-tool-color",
-							"description": "Text color for the modification tools popover"
+							"description": "Author-stylesheet hook used by the demo popover styles. Pair with --table-modifiable-tool-bg. The component itself injects no CSS."
 						}
 					],
 					"superclass": {
@@ -96,6 +125,80 @@
 				{
 					"kind": "js",
 					"name": "TableModifiableElement",
+					"declaration": {
+						"name": "TableModifiableElement",
+						"module": "table-modifiable.js"
+					}
+				}
+			]
+		},
+		{
+			"kind": "javascript-module",
+			"path": "index.js",
+			"description": "Class-only package entry; does not register a custom element.",
+			"declarations": [],
+			"exports": [
+				{
+					"kind": "js",
+					"name": "TableModifiableElement",
+					"declaration": {
+						"name": "TableModifiableElement",
+						"module": "table-modifiable.js"
+					}
+				}
+			]
+		},
+		{
+			"kind": "javascript-module",
+			"path": "define.js",
+			"declarations": [
+				{
+					"kind": "function",
+					"name": "defineTableModifiable",
+					"description": "Importing this module registers the default tag when a browser registry is available. The helper returns false without a usable registry and true when the requested tag is already defined. Calling it for another unregistered tag throws NotSupportedError because the constructor is already registered. For a custom tag, use the class-only import from table-modifiable.js and register the constructor once with customElements.define(), without importing this module.",
+					"parameters": [
+						{
+							"name": "tagName",
+							"type": { "text": "string" },
+							"default": "'table-modifiable'"
+						}
+					],
+					"return": { "type": { "text": "boolean" } }
+				},
+				{
+					"kind": "function",
+					"name": "defineComponentName",
+					"description": "Compatibility wrapper for defineTableModifiable with the same arguments, return value, and registration restrictions.",
+					"parameters": [
+						{
+							"name": "tagName",
+							"type": { "text": "string" },
+							"default": "'table-modifiable'"
+						}
+					],
+					"return": { "type": { "text": "boolean" } }
+				}
+			],
+			"exports": [
+				{
+					"kind": "js",
+					"name": "defineTableModifiable",
+					"declaration": {
+						"name": "defineTableModifiable",
+						"module": "define.js"
+					}
+				},
+				{
+					"kind": "js",
+					"name": "defineComponentName",
+					"declaration": {
+						"name": "defineComponentName",
+						"module": "define.js"
+					}
+				},
+				{
+					"kind": "custom-element-definition",
+					"name": "table-modifiable",
 					"declaration": {
 						"name": "TableModifiableElement",
 						"module": "table-modifiable.js"

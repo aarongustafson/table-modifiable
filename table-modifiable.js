@@ -26,8 +26,6 @@ const CONTROL_DATA_ATTRIBUTE = 'data-table-modifiable-control';
  *
  * @fires table-modifiable:change - Fired when a column visibility is toggled
  *
- * @slot - Default slot for the table element
- *
  * @cssprop --table-modifiable-tool-bg - Background color for the modification tools
  * @cssprop --table-modifiable-tool-color - Text color for the modification tools
  */
