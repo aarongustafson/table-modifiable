@@ -36,8 +36,8 @@
 				<div class="demo-section">
 					<h3>Basic Usage</h3>
 					<div class="code-demo-pair">
-						<pre><code>&lt;table-modifiable removable="Name,Email,Phone"
-  role="region" aria-label="Contact table" tabindex="0"&gt;
+						<pre><code><mark>&lt;table-modifiable removable="Name,Email,Phone"
+  role="region" aria-label="Contact table" tabindex="0"&gt;</mark>
   &lt;table&gt;
     &lt;caption&gt;Contact directory&lt;/caption&gt;
     &lt;thead&gt;
@@ -60,7 +60,7 @@
       &lt;/tr&gt;
     &lt;/tbody&gt;
   &lt;/table&gt;
-&lt;/table-modifiable&gt;</code></pre>
+<mark>&lt;/table-modifiable&gt;</mark></code></pre>
 						<div class="demo">
 							<table-modifiable
 								removable="Name,Email,Phone"
@@ -114,15 +114,15 @@
 				<div class="demo-section">
 					<h3>Hiding Columns by Default</h3>
 					<div class="code-demo-pair">
-						<pre><code>&lt;table-modifiable
+						<pre><code><mark>&lt;table-modifiable
   removable="Product,Price,Stock,Category,Supplier"
   start-with="Product,Price"
-  role="region" aria-label="Product table" tabindex="0"&gt;
+  role="region" aria-label="Product table" tabindex="0"&gt;</mark>
   &lt;table&gt;
     &lt;caption&gt;Product pricing and stock&lt;/caption&gt;
     &lt;!-- table content --&gt;
   &lt;/table&gt;
-&lt;/table-modifiable&gt;</code></pre>
+<mark>&lt;/table-modifiable&gt;</mark></code></pre>
 						<div class="demo">
 							<table-modifiable
 								removable="Product,Price,Stock,Category,Supplier"
@@ -194,8 +194,8 @@
 					<div class="code-demo-pair">
 						<pre><code>&lt;style&gt;
 .custom-controls {
-  --table-modifiable-tool-bg: #fff;
-  --table-modifiable-tool-color: #333;
+  <mark>--table-modifiable-tool-bg</mark>: #fff;
+  <mark>--table-modifiable-tool-color</mark>: #333;
   color-scheme: light;
 }
 .custom-controls .modification-tools-toggle {
@@ -203,18 +203,18 @@
   color: #fff;
 }
 &lt;/style&gt;
-&lt;table-modifiable class="custom-controls" lang="fr"
+<mark>&lt;table-modifiable class="custom-controls" lang="fr"
   removable="Nom,Courriel,Téléphone,Adresse"
   start-with="Nom,Courriel"
   button-label="Choisir les colonnes"
   button-aria-label="Choisir les colonnes du personnel"
   tools-label="Colonnes à afficher"
-  role="region" aria-label="Tableau du personnel" tabindex="0"&gt;
+  role="region" aria-label="Tableau du personnel" tabindex="0"&gt;</mark>
   &lt;table&gt;
     &lt;caption&gt;Coordonnées du personnel&lt;/caption&gt;
     &lt;!-- table content --&gt;
   &lt;/table&gt;
-&lt;/table-modifiable&gt;</code></pre>
+<mark>&lt;/table-modifiable&gt;</mark></code></pre>
 						<div class="demo">
 							<table-modifiable
 								class="custom-controls"
@@ -278,17 +278,17 @@
 				<div class="demo-section">
 					<h3>Event Listener Demo</h3>
 					<div class="code-demo-pair">
-						<pre><code>&lt;table-modifiable
+						<pre><code><mark>&lt;table-modifiable
   id="event-demo"
   removable="First Name,Last Name,Department"
-  role="region" aria-label="Event example table" tabindex="0"&gt;
+  role="region" aria-label="Event example table" tabindex="0"&gt;</mark>
   &lt;!-- table --&gt;
-&lt;/table-modifiable&gt;
+<mark>&lt;/table-modifiable&gt;</mark>
 
 &lt;script&gt;
 document.querySelector('#event-demo')
-  .addEventListener('table-modifiable:change', (e) => {
-    console.log(e.detail);
+  .addEventListener(<mark>'table-modifiable:change'</mark>, (e) => {
+    console.log(<mark>e.detail</mark>);
   });
 &lt;/script&gt;</code></pre>
 						<div class="demo">
