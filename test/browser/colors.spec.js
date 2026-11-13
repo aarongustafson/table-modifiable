@@ -209,6 +209,31 @@ test('package entry stays class-only and the definition module registers automat
 	await expect(page.locator('td')).toHaveText('Alice');
 	await page.evaluate((path) => import(path), '/define.js');
 	await expect(page.locator('.modification-tools-toggle')).toBeVisible();
+	expect(
+		await page.evaluate(async (path) => {
+			const { defineTableModifiable, defineComponentName } = await import(
+				path
+			);
+			return [defineTableModifiable(), defineComponentName()];
+		}, '/define.js'),
+	).toEqual([true, true]);
+	for (const helper of ['defineTableModifiable', 'defineComponentName']) {
+		expect(
+			await page.evaluate(
+				async ({ helper, path }) => {
+					const definition = await import(path);
+					try {
+						definition[helper]('my-custom-table');
+					} catch (error) {
+						if (error instanceof DOMException) return error.name;
+						throw error;
+					}
+					throw new Error('Constructor reuse must throw.');
+				},
+				{ helper, path: '/define.js' },
+			),
+		).toBe('NotSupportedError');
+	}
 });
 
 for (const colorScheme of ['light', 'dark']) {

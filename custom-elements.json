@@ -155,7 +155,7 @@
 				{
 					"kind": "function",
 					"name": "defineTableModifiable",
-					"description": "Importing this module registers the default tag when a browser registry is available. The helper returns false without that registry; otherwise defines the requested tag if absent and returns true. Repeated calls for the same tag are safe.",
+					"description": "Importing this module registers the default tag when a browser registry is available. The helper returns false without a usable registry and true when the requested tag is already defined. Calling it for another unregistered tag throws NotSupportedError because the constructor is already registered. For a custom tag, use the class-only import from table-modifiable.js and register the constructor once with customElements.define(), without importing this module.",
 					"parameters": [
 						{
 							"name": "tagName",
@@ -168,7 +168,7 @@
 				{
 					"kind": "function",
 					"name": "defineComponentName",
-					"description": "Compatibility wrapper for defineTableModifiable with the same arguments and return value.",
+					"description": "Compatibility wrapper for defineTableModifiable with the same arguments, return value, and registration restrictions.",
 					"parameters": [
 						{
 							"name": "tagName",

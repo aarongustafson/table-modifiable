@@ -3,6 +3,23 @@ import { expect, it } from 'vitest';
 
 const read = (path) => readFile(new URL(path, import.meta.url), 'utf8');
 
+it('documents constructor reuse restrictions for registration helpers', async () => {
+	const manifest = JSON.parse(await read('../custom-elements.json'));
+	const helpers = manifest.modules.find(
+		(entry) => entry.path === 'define.js',
+	).declarations;
+	const description = helpers.find(
+		(entry) => entry.name === 'defineTableModifiable',
+	).description;
+	expect(description).toContain('NotSupportedError');
+	expect(description).toContain('class-only');
+	expect(description).toContain('table-modifiable.js');
+	expect(
+		helpers.find((entry) => entry.name === 'defineComponentName')
+			.description,
+	).toContain('registration restrictions');
+});
+
 it('describes real reflected properties, author-style hooks and registration exports', async () => {
 	const manifest = JSON.parse(await read('../custom-elements.json'));
 	expect(manifest).not.toHaveProperty('readme');
