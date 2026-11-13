@@ -434,18 +434,25 @@ test('short localized checkbox labels fit at 320px with enlarged text', async ({
 	await page.addStyleTag({ content: ':root { font-size: 200%; }' });
 	const host = page.locator('table-modifiable[lang="fr"]');
 	await host.locator('button').click();
-	for (const label of await host.locator('label').all()) {
-		const lines = await label.evaluate((label) => {
-			const text = [...label.childNodes].find(
-				(node) => node.nodeType === Node.TEXT_NODE,
-			);
-			if (!text) throw new Error('Expected an authored checkbox name.');
-			const range = document.createRange();
-			range.selectNodeContents(text);
-			return [...range.getClientRects()].filter((rect) => rect.width > 0)
-				.length;
-		});
-		expect(lines, await label.textContent()).toBe(1);
+	for (const family of ['inherit', 'monospace']) {
+		await host.evaluate((host, family) => {
+			host.style.fontFamily = family;
+		}, family);
+		for (const label of await host.locator('label').all()) {
+			const lines = await label.evaluate((label) => {
+				const text = [...label.childNodes].find(
+					(node) => node.nodeType === Node.TEXT_NODE,
+				);
+				if (!text)
+					throw new Error('Expected an authored checkbox name.');
+				const range = document.createRange();
+				range.selectNodeContents(text);
+				return [...range.getClientRects()].filter(
+					(rect) => rect.width > 0,
+				).length;
+			});
+			expect(lines, await label.textContent()).toBe(1);
+		}
 	}
 });
 

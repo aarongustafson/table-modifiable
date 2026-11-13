@@ -187,7 +187,7 @@ You can style the generated elements directly to customize the appearance:
     var(--table-modifiable-tool-bg, Canvas)
   );
   color: var(--table-modifiable-tool-color, CanvasText);
-  padding: 1rem;
+  padding: 0.5rem;
   border-radius: 6px;
   border: 1px solid currentColor;
   inline-size: max-content;

@@ -117,9 +117,8 @@ footer {
 .demo-section {
 	margin-block: 2rem;
 	padding: 1.5rem;
-	background-color: Canvas;
-	background-image: linear-gradient(ButtonFace, ButtonFace);
-	color: ButtonText;
+	background: Canvas;
+	color: CanvasText;
 	border-radius: 8px;
 	border: 1px solid ButtonBorder;
 }
