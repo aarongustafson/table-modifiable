@@ -1,6 +1,10 @@
 # table-modifiable Web Component
 
-[![npm version](https://img.shields.io/npm/v/@aarongustafson/table-modifiable.svg)](https://www.npmjs.com/package/@aarongustafson/table-modifiable) [![Build Status](https://img.shields.io/github/actions/workflow/status/aarongustafson/table-modifiable/ci.yml?branch=main)](https://github.com/aarongustafson/table-modifiable/actions)
+[![npm version](https://img.shields.io/npm/v/@aarongustafson/table-modifiable.svg)](https://www.npmjs.com/package/@aarongustafson/table-modifiable)
+[![CI status](https://img.shields.io/github/actions/workflow/status/aarongustafson/table-modifiable/ci.yml?branch=main&label=CI)](https://github.com/aarongustafson/table-modifiable/actions/workflows/ci.yml)
+[![Minified + gzipped size](https://img.shields.io/bundlejs/size/@aarongustafson/table-modifiable?format=minzip&label=min%2Bgzip)](https://bundlejs.com/?q=@aarongustafson/table-modifiable)
+[![License](https://img.shields.io/npm/l/@aarongustafson/table-modifiable)](https://github.com/aarongustafson/table-modifiable/blob/main/LICENSE)
+[![Type definitions](https://img.shields.io/npm/types/@aarongustafson/table-modifiable)](https://github.com/aarongustafson/table-modifiable/blob/main/table-modifiable.d.ts)
 
 A web component that enables users to hide & show columns on an HTML table.
 
