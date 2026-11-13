@@ -5,131 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>Modifiable Table Web Component Demo</title>
 		<link rel="stylesheet" href="./styles.css" />
-		<style>
-			/* Demo-specific styles */
-			table {
-				width: 100%;
-				border-collapse: collapse;
-				margin-top: 1rem;
-			}
-
-			th,
-			td {
-				border: 1px solid #ddd;
-				padding: 0.75rem;
-				text-align: left;
-			}
-
-			th {
-				background-color: #f5f5f5;
-				color: #222;
-				font-weight: bold;
-			}
-
-			tbody tr:nth-child(even) {
-				background-color: #fafafa;
-				color: #222;
-			}
-
-			/* Button styles */
-			.modification-tools-toggle {
-				background: #0969da;
-				color: white;
-				border: none;
-				padding: 0.5rem 1rem;
-				border-radius: 4px;
-				font-size: 1rem;
-				cursor: pointer;
-				margin-bottom: 1rem;
-			}
-
-			.modification-tools-toggle:hover {
-				background: #0860ca;
-			}
-
-			.modification-tools-toggle:active {
-				background: #0757ba;
-			}
-
-			/* Popover styles */
-			.modification-tools {
-				background: white;
-				color: #333;
-				padding: 1rem;
-				border-radius: 6px;
-				border: 1px solid #d0d7de;
-				box-shadow: 0 8px 24px rgba(140, 149, 159, 0.2);
-				min-width: 250px;
-			}
-
-			.modification-tools-heading {
-				font-weight: bold;
-				display: block;
-				margin-bottom: 0.75rem;
-				font-size: 1.1rem;
-				color: #24292f;
-			}
-
-			.modification-tools ul {
-				list-style: none;
-				padding: 0;
-				margin: 0;
-				display: flex;
-				flex-direction: column;
-				gap: 0.5rem;
-			}
-
-			.modification-tools li {
-				margin: 0;
-			}
-
-			.modification-tools label {
-				cursor: pointer;
-				user-select: none;
-				display: flex;
-				align-items: center;
-				gap: 0.5rem;
-				padding: 0.25rem;
-				margin: 0;
-			}
-
-			.modification-tools label:hover {
-				background: #f6f8fa;
-				border-radius: 3px;
-			}
-
-			.modification-tools input[type='checkbox'] {
-				cursor: pointer;
-			}
-
-			.event-log {
-				background: #f5f5f5;
-				border: 1px solid #ddd;
-				color: #000;
-				padding: 1rem;
-				margin-top: 1rem;
-				border-radius: 4px;
-				max-height: 200px;
-				overflow-y: auto;
-			}
-
-			.event-log h4 {
-				margin-top: 0;
-			}
-
-			.event-log pre {
-				margin: 0.5rem 0;
-				padding: 0.5rem;
-				background: white;
-				color: #000;
-				border-radius: 2px;
-				font-size: 0.9em;
-			}
-
-			.demo-section {
-				margin-bottom: 3rem;
-			}
-		</style>
+		<link rel="stylesheet" href="./tables.css" />
 	</head>
 	<body>
 		<header>
@@ -137,12 +13,18 @@
 			<p>
 				A web component that enables users to hide & show columns on an
 				HTML table. See the
-				<a href="../">README</a>
+				<a href="../README.md">README</a>
 				for installation and API documentation.
 			</p>
 		</header>
 
 		<main>
+			<p class="note">
+				Each table keeps its data before JavaScript loads or if the
+				module fails. Enhancement adds a native popover with labeled
+				checkboxes; at least one selectable column stays visible. Focus
+				a table region and use the arrow keys to scroll wider data.
+			</p>
 			<!-- Basic Example -->
 			<section>
 				<h2>Basic Example</h2>
@@ -154,8 +36,10 @@
 				<div class="demo-section">
 					<h3>Basic Usage</h3>
 					<div class="code-demo-pair">
-						<pre><code>&lt;table-modifiable removable="Name,Email,Phone"&gt;
+						<pre><code>&lt;table-modifiable removable="Name,Email,Phone"
+  role="region" aria-label="Contact table" tabindex="0"&gt;
   &lt;table&gt;
+    &lt;caption&gt;Contact directory&lt;/caption&gt;
     &lt;thead&gt;
       &lt;tr&gt;
         &lt;th&gt;Name&lt;/th&gt;
@@ -178,8 +62,16 @@
   &lt;/table&gt;
 &lt;/table-modifiable&gt;</code></pre>
 						<div class="demo">
-							<table-modifiable removable="Name,Email,Phone">
+							<table-modifiable
+								removable="Name,Email,Phone"
+								role="region"
+								aria-label="Contact table"
+								tabindex="0"
+							>
 								<table>
+									<caption>
+										Contact directory
+									</caption>
 									<thead>
 										<tr>
 											<th>Name</th>
@@ -224,8 +116,10 @@
 					<div class="code-demo-pair">
 						<pre><code>&lt;table-modifiable
   removable="Product,Price,Stock,Category,Supplier"
-  start-with="Product,Price"&gt;
+  start-with="Product,Price"
+  role="region" aria-label="Product table" tabindex="0"&gt;
   &lt;table&gt;
+    &lt;caption&gt;Product pricing and stock&lt;/caption&gt;
     &lt;!-- table content --&gt;
   &lt;/table&gt;
 &lt;/table-modifiable&gt;</code></pre>
@@ -233,8 +127,14 @@
 							<table-modifiable
 								removable="Product,Price,Stock,Category,Supplier"
 								start-with="Product,Price"
+								role="region"
+								aria-label="Product table"
+								tabindex="0"
 							>
 								<table>
+									<caption>
+										Product pricing and stock
+									</caption>
 									<thead>
 										<tr>
 											<th>Product</th>
@@ -276,41 +176,68 @@
 
 			<!-- Custom Labels Example -->
 			<section>
-				<h2>Custom Labels</h2>
+				<h2>Localized Labels and a Custom Palette</h2>
 				<p>
 					Customize the button and popover labels using the
 					<code>button-label</code>, <code>button-aria-label</code>,
-					and <code>tools-label</code> attributes.
+					and <code>tools-label</code> attributes. Column names come
+					from your table. The shared author stylesheet uses
+					<code>--table-modifiable-tool-bg</code> and
+					<code>--table-modifiable-tool-color</code> together for the
+					popover; the component itself injects no colors or CSS. This
+					example retains the blue control theme with an explicit
+					light popover pair and French text.
 				</p>
 
 				<div class="demo-section">
 					<h3>Customized Interface</h3>
 					<div class="code-demo-pair">
-						<pre><code>&lt;table-modifiable
-  removable="Name,Email,Phone,Address"
-  start-with="Name,Email"
-  button-label="⚙️ Customize View"
-  button-aria-label="Customize which columns are visible"
-  tools-label="Choose Columns to Display"&gt;
+						<pre><code>&lt;style&gt;
+.custom-controls {
+  --table-modifiable-tool-bg: #fff;
+  --table-modifiable-tool-color: #333;
+  color-scheme: light;
+}
+.custom-controls .modification-tools-toggle {
+  background: #0969da;
+  color: #fff;
+}
+&lt;/style&gt;
+&lt;table-modifiable class="custom-controls" lang="fr"
+  removable="Nom,Courriel,Téléphone,Adresse"
+  start-with="Nom,Courriel"
+  button-label="Choisir les colonnes"
+  button-aria-label="Choisir les colonnes du personnel"
+  tools-label="Colonnes à afficher"
+  role="region" aria-label="Tableau du personnel" tabindex="0"&gt;
   &lt;table&gt;
+    &lt;caption&gt;Coordonnées du personnel&lt;/caption&gt;
     &lt;!-- table content --&gt;
   &lt;/table&gt;
 &lt;/table-modifiable&gt;</code></pre>
 						<div class="demo">
 							<table-modifiable
-								removable="Name,Email,Phone,Address"
-								start-with="Name,Email"
-								button-label="⚙️ Customize View"
-								button-aria-label="Customize which columns are visible in the table"
-								tools-label="Choose Columns to Display"
+								class="custom-controls"
+								lang="fr"
+								removable="Nom,Courriel,Téléphone,Adresse"
+								start-with="Nom,Courriel"
+								button-label="Choisir les colonnes"
+								button-aria-label="Choisir les colonnes du personnel"
+								tools-label="Colonnes à afficher"
+								role="region"
+								aria-label="Tableau du personnel"
+								tabindex="0"
 							>
 								<table>
+									<caption>
+										Coordonnées du personnel
+									</caption>
 									<thead>
 										<tr>
-											<th>Name</th>
-											<th>Email</th>
-											<th>Phone</th>
-											<th>Address</th>
+											<th>Nom</th>
+											<th>Courriel</th>
+											<th>Téléphone</th>
+											<th>Adresse</th>
 										</tr>
 									</thead>
 									<tbody>
@@ -353,7 +280,8 @@
 					<div class="code-demo-pair">
 						<pre><code>&lt;table-modifiable
   id="event-demo"
-  removable="First Name,Last Name,Department"&gt;
+  removable="First Name,Last Name,Department"
+  role="region" aria-label="Event example table" tabindex="0"&gt;
   &lt;!-- table --&gt;
 &lt;/table-modifiable&gt;
 
@@ -367,8 +295,14 @@ document.querySelector('#event-demo')
 							<table-modifiable
 								id="event-demo"
 								removable="First Name,Last Name,Department"
+								role="region"
+								aria-label="Event example table"
+								tabindex="0"
 							>
 								<table>
+									<caption>
+										Staff departments
+									</caption>
 									<thead>
 										<tr>
 											<th>First Name</th>
@@ -411,7 +345,7 @@ document.querySelector('#event-demo')
 				<p>
 					For complete documentation of attributes, events, and
 					browser support, see the
-					<a href="../">README</a>.
+					<a href="../README.md">README</a>.
 				</p>
 			</section>
 		</main>

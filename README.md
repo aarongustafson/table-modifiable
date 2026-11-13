@@ -23,16 +23,19 @@ npm install @aarongustafson/table-modifiable
 
 ### Option 1: Auto-define the custom element (easiest)
 
-Import the package to automatically define the `<table-modifiable>` custom element:
+Import the definition module to register `<table-modifiable>` automatically:
 
 ```javascript
-import '@aarongustafson/table-modifiable';
+import '@aarongustafson/table-modifiable/define.js';
 ```
 
 Or use the define-only script in HTML:
 
 ```html
-<script src="./node_modules/@aarongustafson/table-modifiable/define.js" type="module"></script>
+<script
+  src="./node_modules/@aarongustafson/table-modifiable/define.js"
+  type="module"
+></script>
 ```
 
 ### Option 2: Import the class and define manually
@@ -45,19 +48,33 @@ import { TableModifiableElement } from '@aarongustafson/table-modifiable/table-m
 customElements.define('my-custom-name', TableModifiableElement);
 ```
 
-You can also call the provided helper to register the element without importing the class:
+The package root and `table-modifiable.js` export only the class; neither
+registers it. Importing `define.js` already calls its helper for the default tag.
+You can call that helper again for the same tag safely:
 
 ```javascript
 import { defineTableModifiable } from '@aarongustafson/table-modifiable/define.js';
 
-defineTableModifiable('my-custom-name');
+defineTableModifiable();
 ```
+
+For a custom tag, use the class-only import and register the class once, as
+shown above. The helper returns `false` without a usable browser registry.
 
 ### Basic Example
 
 ```html
-<table-modifiable removable="Name,Email,Phone" start-with="Name,Email">
+<table-modifiable
+  removable="Name,Email,Phone"
+  start-with="Name,Email"
+  role="region"
+  aria-label="Contact table"
+  tabindex="0"
+>
   <table>
+    <caption>
+      Contact directory
+    </caption>
     <thead>
       <tr>
         <th>Name</th>
@@ -76,19 +93,33 @@ defineTableModifiable('my-custom-name');
 </table-modifiable>
 ```
 
+Before enhancement, every column is readable. JavaScript adds a native toggle
+button and popover with labeled checkboxes, then applies `start-with`.
+Provide a caption and a named, keyboard-focusable scrolling region when the
+table can overflow. See [the demo table styles](./demo/tables.css).
+
 ## Attributes
 
-| Attribute | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `removable` | `string` | `""` | Comma-separated list of all column names that can be shown/hidden |
-| `start-with` | `string` | (all removable) | Comma-separated list of which columns should be visible by default. If not specified, all removable columns will be shown initially |
-| `button-label` | `string` | `"Modify Table"` | Text label for the toggle button |
-| `button-aria-label` | `string` | (same as button-label) | Accessible label for the toggle button. Use this to provide a more descriptive label for screen readers if needed |
-| `tools-label` | `string` | `"Show/Hide Columns"` | Heading text for the popover panel |
+| Attribute           | Type     | Default                | Description                                                                                                                         |
+| ------------------- | -------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `removable`         | `string` | (required)             | Comma-separated list of all column names that can be shown/hidden                                                                   |
+| `start-with`        | `string` | (all removable)        | Comma-separated list of which columns should be visible by default. If not specified, all removable columns will be shown initially |
+| `button-label`      | `string` | `"Modify Table"`       | Text label for the toggle button                                                                                                    |
+| `button-aria-label` | `string` | (same as button-label) | Accessible label for the toggle button. Use this to provide a more descriptive label for screen readers if needed                   |
+| `tools-label`       | `string` | `"Show/Hide Columns"`  | Heading text for the popover panel                                                                                                  |
 
 ## Properties
 
-All of the attributes above have matching camelCase properties (`removable`, `startWith`, `buttonLabel`, `buttonAriaLabel`, `toolsLabel`). Setting a property updates the corresponding attribute and schedules the component to re-render.
+All five attributes have matching properties (`removable`, `startWith`,
+`buttonLabel`, `buttonAriaLabel`, `toolsLabel`) typed as `string | null`.
+Setting a property reflects its attribute and schedules a rebuild. Assigning
+`null`, `undefined`, or `''` removes it. Missing or empty labels use the defaults
+above; a missing or empty `start-with` shows all removable columns.
+
+Configure these values before initialization. Rebuilding does not preserve an
+open popover, checkbox focus, or user choices, and cleanup does not clear
+previously hidden cell styles. Don’t use reconfiguration to preserve a customized
+view.
 
 ```javascript
 const modifiable = document.querySelector('table-modifiable');
@@ -100,8 +131,8 @@ modifiable.startWith = 'Name';
 
 The component fires custom events that you can listen to:
 
-| Event | Description | Detail |
-|-------|-------------|--------|
+| Event                     | Description                                 | Detail                                 |
+| ------------------------- | ------------------------------------------- | -------------------------------------- |
 | `table-modifiable:change` | Fired when a column's visibility is toggled | `{ column: string, visible: boolean }` |
 
 ### Example Event Handling
@@ -110,16 +141,24 @@ The component fires custom events that you can listen to:
 const element = document.querySelector('table-modifiable');
 
 element.addEventListener('table-modifiable:change', (event) => {
-  console.log(`Column "${event.detail.column}" is now ${event.detail.visible ? 'visible' : 'hidden'}`);
+  console.log(
+    `Column "${event.detail.column}" is now ${event.detail.visible ? 'visible' : 'hidden'}`,
+  );
 });
 ```
 
 ## CSS Custom Properties
 
-| Property | Default | Description |
-|----------|---------|-------------|
-| `--table-modifiable-tool-bg` | (none) | Background color for the modification tools popover |
-| `--table-modifiable-tool-color` | (none) | Text color for the modification tools popover |
+| Property                        | Default | Description                                         |
+| ------------------------------- | ------- | --------------------------------------------------- |
+| `--table-modifiable-tool-bg`    | (none)  | Background color for the modification tools popover |
+| `--table-modifiable-tool-color` | (none)  | Text color for the modification tools popover       |
+
+These are author-stylesheet hooks, not injected component styles. They take
+effect when your CSS uses them, as below and in
+[the shared demo stylesheet](./demo/tables.css). Set foreground and background
+together and test them on the actual top-layer popover, including native
+checkboxes.
 
 ### Example Styling
 
@@ -128,28 +167,35 @@ You can style the generated elements directly to customize the appearance:
 ```css
 /* Style the toggle button */
 .modification-tools-toggle {
-  background: #0969da;
-  color: white;
-  border: none;
+  background-color: Canvas;
+  background-image: linear-gradient(ButtonFace, ButtonFace);
+  color: ButtonText;
+  border: 1px solid currentColor;
   padding: 0.5rem 1rem;
   border-radius: 4px;
-  font-size: 1rem;
+  max-inline-size: 100%;
+  font: inherit;
   cursor: pointer;
-}
-
-.modification-tools-toggle:hover {
-  background: #0860ca;
 }
 
 /* Style the popover */
 .modification-tools {
-  background: var(--table-modifiable-tool-bg, white);
-  color: var(--table-modifiable-tool-color, #333);
+  box-sizing: border-box;
+  background-color: Canvas;
+  background-image: linear-gradient(
+    var(--table-modifiable-tool-bg, Canvas),
+    var(--table-modifiable-tool-bg, Canvas)
+  );
+  color: var(--table-modifiable-tool-color, CanvasText);
   padding: 1rem;
   border-radius: 6px;
-  border: 1px solid #d0d7de;
-  box-shadow: 0 8px 24px rgba(140, 149, 159, 0.2);
-  min-width: 250px;
+  border: 1px solid currentColor;
+  inline-size: max-content;
+  min-inline-size: min(16rem, calc(100vw - 1rem));
+  max-inline-size: calc(100vw - 1rem);
+  max-block-size: calc(100dvb - 2rem);
+  overflow: auto;
+  overflow-wrap: anywhere;
 }
 
 .modification-tools-heading {
@@ -174,9 +220,26 @@ You can style the generated elements directly to customize the appearance:
 
 .modification-tools label {
   cursor: pointer;
-  user-select: none;
+  display: flex;
+  align-items: start;
+  gap: 0.5rem;
+  min-block-size: 2.75rem;
+  margin: 0;
+  padding: 0.25rem;
 }
 ```
+
+The Canvas backing keeps translucent system surfaces from compositing over an
+unrelated page surface. The demos use Canvas/CanvasText for table data and the
+popover, ButtonFace/ButtonText for controls, and Field/FieldText for code and
+event output. Supporting footer text uses an 80% foreground mix on Canvas,
+with full-strength text in forced colors and increased contrast. Native focus
+outlines and checkbox states remain under browser control.
+
+The localized example retains the blue control theme with a complete explicit
+light pair. Automatic forced-color adjustment is not disabled. This doesn’t
+prove that every native platform control palette meets contrast requirements;
+test your target browsers and user palettes.
 
 ## How It Works
 
@@ -194,12 +257,51 @@ This component wraps an HTML table and adds interactive controls to show/hide co
 
 **Note**: This component works with simple tables (one header row, matching body cells). It does not support `colspan` or `rowspan` attributes.
 
+Names are trimmed and case-sensitive. Use real, unique first-row header names
+in both lists. Unknown `start-with` values can hide every removable column;
+the last-checkbox safeguard applies to user changes, not invalid initial
+configuration. Columns omitted from `removable` stay outside these controls.
+
+Hiding sets `display: none` on the header and matching `tbody` cells. It does
+not remove data, disable form controls, hide `tfoot` cells, or provide access
+control. Initial hiding and rejected attempts to uncheck the last checkbox
+do not fire change events.
+
+## Accessibility and Lifecycle
+
+The browser handles popover activation, keyboard navigation, Escape, and focus
+return. The demos verify native button/checkbox operation, retained table data,
+stable labels, and focus. They do not add duplicate live announcements for
+column changes. The panel label is a styled span, not a generated heading.
+
+Translate `button-label`, `button-aria-label`, `tools-label`, and the authored
+column names together. A longer accessible button name should include its
+visible label. The [French demo](./demo/index.html) shows those labels with
+authored table and region names.
+
+The component observes structural child-list changes under the host and its
+five configuration attributes. Rebuilds replace the controls. Disconnecting
+cancels pending animation-frame initialization, disconnects the observer,
+removes the change listener and generated controls, and clears cached indexes.
+It does not restore hidden cells. Keep the table in place while people are
+using its controls; manage recovery and focus when your application replaces it.
+
+Without JavaScript or after module-loading failure, the authored table remains
+readable with all columns present. Native Popover API support is required for
+the enhanced popup interaction; older-browser/polyfill behavior is not verified.
+Keyboard, zoom, forced colors, and assistive-technology testing in your target
+environment remains necessary. Automated checks alone do not establish
+conformance.
+
 ## Advanced Examples
 
 ### Table with Multiple Columns
 
 ```html
-<table-modifiable removable="Product,Price,Stock,Category" start-with="Product,Price">
+<table-modifiable
+  removable="Product,Price,Stock,Category"
+  start-with="Product,Price"
+>
   <table>
     <thead>
       <tr>
@@ -229,7 +331,8 @@ This component wraps an HTML table and adds interactive controls to show/hide co
   start-with="Name,Email"
   button-label="Customize Columns"
   button-aria-label="Customize which columns are visible in the table"
-  tools-label="Select Visible Columns">
+  tools-label="Select Visible Columns"
+>
   <table>
     <thead>
       <tr>
@@ -264,7 +367,9 @@ import { defineTableModifiable } from '@aarongustafson/table-modifiable/define.j
 
 defineTableModifiable();
 
-const element = document.querySelector('table-modifiable') as TableModifiableElement;
+const element = document.querySelector(
+  'table-modifiable',
+) as TableModifiableElement;
 
 element.addEventListener(
   'table-modifiable:change',
@@ -277,6 +382,7 @@ element.addEventListener(
 ## Browser Support
 
 This component uses modern web standards:
+
 - Custom Elements v1
 - ES Modules
 - Popover API
@@ -301,8 +407,13 @@ npm run lint
 # Format code
 npm run format
 
-# View demo
-open demo/index.html
+# Run browser regressions (install engines once)
+npx playwright install chromium firefox webkit
+npm run test:browser
+
+# Serve the demo
+node scripts/serve.js
+# Open http://127.0.0.1:4182/demo/index.html
 ```
 
 ## License
