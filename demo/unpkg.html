@@ -4,18 +4,43 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>table-modifiable via unpkg</title>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/microlighter@2.2.0/dist/themes/github.css"
+		/>
 		<link rel="stylesheet" href="./styles.css" />
+		<link rel="stylesheet" href="./demo-shell.css" />
 		<link rel="stylesheet" href="./tables.css" />
 	</head>
-	<body>
+	<body data-syntax-theme="github">
+		<a class="skip-link" href="#main">Skip to examples</a>
 		<header>
-			<h1>Modifiable Table via unpkg</h1>
-			<p>
+			<p class="eyebrow">Web component / unpkg</p>
+			<h1>&lt;table-modifiable&gt;</h1>
+			<p class="lede">
 				See the <a href="../README.md">README</a> for installation and
 				API documentation.
 			</p>
+			<nav aria-label="Component resources">
+				<a
+					href="https://github.com/aarongustafson/table-modifiable/blob/main/README.md"
+					>Read the README</a
+				>
+				<a href="https://github.com/aarongustafson/table-modifiable"
+					>View on GitHub</a
+				>
+				<a href="./index.html">All examples</a>
+				<a href="./esm.html">esm.sh example</a>
+			</nav>
 		</header>
-		<main>
+		<main id="main" tabindex="-1">
+			<p
+				id="microlighter-status"
+				class="enhancement-status"
+				role="status"
+				hidden
+			></p>
+
 			<section class="demo-section">
 				<h2>Automatic registration</h2>
 				<p>
@@ -29,7 +54,16 @@
 					table region to scroll wider data with the arrow keys.
 				</p>
 				<div class="code-demo-pair">
-					<pre><code>&lt;script type="module"&gt;
+					<micro-lighter
+						class="code-panel"
+						language="html"
+						controls="copy"
+						data-label="HTML"
+					>
+						<pre
+							aria-label="Automatic registration code 1"
+							tabindex="0"
+						><code>&lt;script type="module"&gt;
 <mark>import { defineTableModifiable } from
   'https://unpkg.com/@aarongustafson/table-modifiable@latest/define.js?module';</mark>
 <mark>defineTableModifiable();</mark>
@@ -49,6 +83,7 @@
     &lt;/tbody&gt;
   &lt;/table&gt;
 <mark>&lt;/table-modifiable&gt;</mark></code></pre>
+					</micro-lighter>
 					<div class="demo">
 						<table-modifiable
 							removable="Name,Email,Phone"
@@ -106,5 +141,6 @@
 
 			defineTableModifiable();
 		</script>
+		<script type="module" src="./code-examples.js"></script>
 	</body>
 </html>

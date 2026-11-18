@@ -4,21 +4,46 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>Modifiable Table Web Component Demo</title>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/microlighter@2.2.0/dist/themes/github.css"
+		/>
 		<link rel="stylesheet" href="./styles.css" />
+		<link rel="stylesheet" href="./demo-shell.css" />
 		<link rel="stylesheet" href="./tables.css" />
 	</head>
-	<body>
+	<body data-syntax-theme="github">
+		<a class="skip-link" href="#main">Skip to examples</a>
 		<header>
-			<h1>Modifiable Table Web Component Demo</h1>
-			<p>
+			<p class="eyebrow">Web component / Examples</p>
+			<h1>&lt;table-modifiable&gt;</h1>
+			<p class="lede">
 				A web component that enables users to hide & show columns on an
 				HTML table. See the
 				<a href="../README.md">README</a>
 				for installation and API documentation.
 			</p>
+			<nav aria-label="Component resources">
+				<a
+					href="https://github.com/aarongustafson/table-modifiable/blob/main/README.md"
+					>Read the README</a
+				>
+				<a href="https://github.com/aarongustafson/table-modifiable"
+					>View on GitHub</a
+				>
+				<a href="./esm.html">esm.sh example</a>
+				<a href="./unpkg.html">unpkg example</a>
+			</nav>
 		</header>
 
-		<main>
+		<main id="main" tabindex="-1">
+			<p
+				id="microlighter-status"
+				class="enhancement-status"
+				role="status"
+				hidden
+			></p>
+
 			<p class="note">
 				Each table keeps its data before JavaScript loads or if the
 				module fails. Enhancement adds a native popover with labeled
@@ -36,7 +61,16 @@
 				<div class="demo-section">
 					<h3>Basic Usage</h3>
 					<div class="code-demo-pair">
-						<pre><code><mark>&lt;table-modifiable removable="Name,Email,Phone"
+						<micro-lighter
+							class="code-panel"
+							language="html"
+							controls="copy"
+							data-label="HTML"
+						>
+							<pre
+								aria-label="Basic Usage code 1"
+								tabindex="0"
+							><code><mark>&lt;table-modifiable removable="Name,Email,Phone"
   role="region" aria-label="Contact table" tabindex="0"&gt;</mark>
   &lt;table&gt;
     &lt;caption&gt;Contact directory&lt;/caption&gt;
@@ -61,6 +95,7 @@
     &lt;/tbody&gt;
   &lt;/table&gt;
 <mark>&lt;/table-modifiable&gt;</mark></code></pre>
+						</micro-lighter>
 						<div class="demo">
 							<table-modifiable
 								removable="Name,Email,Phone"
@@ -114,7 +149,16 @@
 				<div class="demo-section">
 					<h3>Hiding Columns by Default</h3>
 					<div class="code-demo-pair">
-						<pre><code><mark>&lt;table-modifiable
+						<micro-lighter
+							class="code-panel"
+							language="html"
+							controls="copy"
+							data-label="HTML"
+						>
+							<pre
+								aria-label="Hiding Columns by Default code 2"
+								tabindex="0"
+							><code><mark>&lt;table-modifiable
   removable="Product,Price,Stock,Category,Supplier"
   start-with="Product,Price"
   role="region" aria-label="Product table" tabindex="0"&gt;</mark>
@@ -123,6 +167,7 @@
     &lt;!-- table content --&gt;
   &lt;/table&gt;
 <mark>&lt;/table-modifiable&gt;</mark></code></pre>
+						</micro-lighter>
 						<div class="demo">
 							<table-modifiable
 								removable="Product,Price,Stock,Category,Supplier"
@@ -192,7 +237,16 @@
 				<div class="demo-section">
 					<h3>Customized Interface</h3>
 					<div class="code-demo-pair">
-						<pre><code>&lt;style&gt;
+						<micro-lighter
+							class="code-panel"
+							language="html"
+							controls="copy"
+							data-label="HTML"
+						>
+							<pre
+								aria-label="Customized Interface code 3"
+								tabindex="0"
+							><code>&lt;style&gt;
 .custom-controls {
   <mark>--table-modifiable-tool-bg</mark>: #fff;
   <mark>--table-modifiable-tool-color</mark>: #333;
@@ -215,6 +269,7 @@
     &lt;!-- table content --&gt;
   &lt;/table&gt;
 <mark>&lt;/table-modifiable&gt;</mark></code></pre>
+						</micro-lighter>
 						<div class="demo">
 							<table-modifiable
 								class="custom-controls"
@@ -278,7 +333,16 @@
 				<div class="demo-section">
 					<h3>Event Listener Demo</h3>
 					<div class="code-demo-pair">
-						<pre><code><mark>&lt;table-modifiable
+						<micro-lighter
+							class="code-panel"
+							language="html"
+							controls="copy"
+							data-label="HTML"
+						>
+							<pre
+								aria-label="Event Listener Demo code 4"
+								tabindex="0"
+							><code><mark>&lt;table-modifiable
   id="event-demo"
   removable="First Name,Last Name,Department"
   role="region" aria-label="Event example table" tabindex="0"&gt;</mark>
@@ -291,6 +355,7 @@ document.querySelector('#event-demo')
     console.log(<mark>e.detail</mark>);
   });
 &lt;/script&gt;</code></pre>
+						</micro-lighter>
 						<div class="demo">
 							<table-modifiable
 								id="event-demo"
@@ -392,5 +457,6 @@ document.querySelector('#event-demo')
 				);
 			}
 		</script>
+		<script type="module" src="./code-examples.js"></script>
 	</body>
 </html>

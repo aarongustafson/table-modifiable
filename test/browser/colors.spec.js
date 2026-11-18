@@ -1,6 +1,13 @@
 import { readFile } from 'node:fs/promises';
 import { test, expect } from '@playwright/test';
 
+test.beforeEach(async ({ page }) => {
+	await page.route(
+		'https://cdn.jsdelivr.net/npm/microlighter@2.2.0/dist/**',
+		(route) => route.abort(),
+	);
+});
+
 const read = (path) =>
 	readFile(new URL(`../../${path}`, import.meta.url), 'utf8');
 const source = await read('table-modifiable.js');
@@ -284,6 +291,9 @@ test('all 19 palettes cover table, button, top-layer popover, hover and supporti
 	test.setTimeout(120_000);
 	await page.setViewportSize({ width: 1400, height: 900 });
 	await demo(page);
+	await page
+		.locator('link[href^="https://cdn.jsdelivr.net/"]')
+		.evaluateAll((links) => links.forEach((link) => link.remove()));
 	const originals = await page.evaluate(() =>
 		[...document.styleSheets].map((sheet, index) => {
 			const text = [...sheet.cssRules]
@@ -399,7 +409,8 @@ test('native keyboard popover controls preserve data, focus and a last selectabl
 	await page.keyboard.press(tabKey);
 	const first = host.getByRole('checkbox', { name: 'Name', exact: true });
 	await expect(first).toBeFocused();
-	await expect(first).toHaveCSS('outline-style', 'auto');
+	await expect(first).toHaveCSS('outline-style', 'solid');
+	await expect(first).toHaveCSS('outline-width', '3px');
 	await page.keyboard.press('Space');
 	await expect(first).not.toBeChecked();
 	await expect(host.locator('thead th').first()).toBeHidden();
@@ -525,7 +536,8 @@ test('forced colors retain native focus, checkbox state and automatic adjustment
 	const box = host.getByRole('checkbox').first();
 	await box.focus();
 	await expect(box).toBeChecked();
-	await expect(box).toHaveCSS('outline-style', 'auto');
+	await expect(box).toHaveCSS('outline-style', 'solid');
+	await expect(box).toHaveCSS('outline-width', '3px');
 	await expect(box).toHaveCSS('forced-color-adjust', 'auto');
 	await page.keyboard.press('Space');
 	await expect(box).not.toBeChecked();
@@ -551,7 +563,7 @@ for (const name of ['index.html', 'esm.html', 'unpkg.html']) {
 		await expect(page.locator('.code-demo-pair').first()).toBeVisible();
 		for (const pair of await page.locator('.code-demo-pair').all()) {
 			await expect(pair.locator(':scope > *')).toHaveCount(2);
-			await expect(pair.locator(':scope > pre')).toHaveCount(1);
+			await expect(pair.locator(':scope > micro-lighter')).toHaveCount(1);
 			await expect(pair.locator(':scope > .demo')).toHaveCount(1);
 		}
 		for (const width of [1400, 1024, 768, 320]) {
