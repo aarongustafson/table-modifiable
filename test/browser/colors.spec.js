@@ -1,6 +1,13 @@
 import { readFile } from 'node:fs/promises';
 import { test, expect } from '@playwright/test';
 
+test.beforeEach(async ({ page }) => {
+	await page.route(
+		'https://cdn.jsdelivr.net/npm/microlighter@2.2.0/dist/**',
+		(route) => route.abort(),
+	);
+});
+
 const read = (path) =>
 	readFile(new URL(`../../${path}`, import.meta.url), 'utf8');
 const source = await read('table-modifiable.js');
@@ -278,87 +285,105 @@ for (const colorScheme of ['light', 'dark']) {
 	});
 }
 
-test('all 19 palettes cover table, button, top-layer popover, hover and supporting surfaces', async ({
-	page,
-}) => {
-	test.setTimeout(120_000);
-	await page.setViewportSize({ width: 1400, height: 900 });
-	await demo(page);
-	const originals = await page.evaluate(() =>
-		[...document.styleSheets].map((sheet, index) => {
-			const text = [...sheet.cssRules]
-				.map((rule) => rule.cssText)
-				.join('\n');
-			const replacement = document.createElement('style');
-			replacement.dataset.paletteIndex = index;
-			sheet.ownerNode.replaceWith(replacement);
-			return text;
-		}),
-	);
-	for (const [index, palette] of palettes.entries()) {
-		for (const [sheet, css] of originals.entries()) {
-			await page.locator(`style[data-palette-index="${sheet}"]`).evaluate(
-				(style, css) => {
-					style.textContent = css;
-				},
-				substitute(css, palette),
+for (const contrast of ['no-preference', 'more']) {
+	test(`${contrast}: all 19 palettes cover table, button, top-layer popover, hover and supporting surfaces`, async ({
+		page,
+	}) => {
+		test.setTimeout(120_000);
+		await page.emulateMedia({ contrast });
+		await page.setViewportSize({ width: 1400, height: 900 });
+		await demo(page);
+		await page.locator('#event-demo').evaluate((host) => {
+			host.dispatchEvent(
+				new CustomEvent('table-modifiable:change', {
+					detail: { column: 1, visible: false },
+				}),
 			);
-		}
-		for (const selector of [
-			'footer',
-			'.demo-section',
-			'pre',
-			'.event-log',
-			'.api-reference',
-		]) {
-			expect(
-				(await measurements(page.locator(selector).first())).text,
-				`${index}: ${selector}`,
-			).toBeGreaterThanOrEqual(4.5);
-		}
-		for (const host of await page.locator('table-modifiable').all()) {
-			for (const cell of await host
-				.locator('th:visible, td:visible')
-				.all()) {
+		});
+		await page
+			.locator('link[href^="https://cdn.jsdelivr.net/"]')
+			.evaluateAll((links) => links.forEach((link) => link.remove()));
+		const originals = await page.evaluate(() =>
+			[...document.styleSheets].map((sheet, index) => {
+				const text = [...sheet.cssRules]
+					.map((rule) => rule.cssText)
+					.join('\n');
+				const replacement = document.createElement('style');
+				replacement.dataset.paletteIndex = index;
+				sheet.ownerNode.replaceWith(replacement);
+				return text;
+			}),
+		);
+		for (const [index, palette] of palettes.entries()) {
+			for (const [sheet, css] of originals.entries()) {
+				await page
+					.locator(`style[data-palette-index="${sheet}"]`)
+					.evaluate(
+						(style, css) => {
+							style.textContent = css;
+						},
+						substitute(css, palette),
+					);
+			}
+			for (const selector of [
+				'footer',
+				'.demo-section',
+				'pre',
+				'.event-log',
+				'.event-log pre',
+				'.api-reference',
+			]) {
 				expect(
-					(await measurements(cell)).text,
-					`${index}: cell`,
+					(await measurements(page.locator(selector).first())).text,
+					`${index}: ${selector}`,
 				).toBeGreaterThanOrEqual(4.5);
 			}
-			const button = host.locator('.modification-tools-toggle');
-			const control = await measurements(button);
-			expect(control.text, `${index}: button`).toBeGreaterThanOrEqual(
-				4.5,
-			);
-			expect(
-				control.boundary,
-				`${index}: button boundary`,
-			).toBeGreaterThanOrEqual(3);
-			await button.click();
-			const panel = host.locator('.modification-tools');
-			await expect(panel).toBeVisible();
-			expect(
-				await panel.evaluate((panel) => panel.matches(':popover-open')),
-			).toBe(true);
-			expect(
-				(await measurements(panel)).text,
-				`${index}: popover`,
-			).toBeGreaterThanOrEqual(4.5);
-			for (const label of await panel.locator('label').all()) {
+			for (const host of await page.locator('table-modifiable').all()) {
+				for (const cell of await host
+					.locator('th:visible, td:visible')
+					.all()) {
+					expect(
+						(await measurements(cell)).text,
+						`${index}: cell`,
+					).toBeGreaterThanOrEqual(4.5);
+				}
+				const button = host.locator('.modification-tools-toggle');
+				const control = await measurements(button);
+				expect(control.text, `${index}: button`).toBeGreaterThanOrEqual(
+					4.5,
+				);
 				expect(
-					(await measurements(label)).text,
-					`${index}: label`,
+					control.boundary,
+					`${index}: button boundary`,
+				).toBeGreaterThanOrEqual(3);
+				await button.click();
+				const panel = host.locator('.modification-tools');
+				await expect(panel).toBeVisible();
+				expect(
+					await panel.evaluate((panel) =>
+						panel.matches(':popover-open'),
+					),
+				).toBe(true);
+				expect(
+					(await measurements(panel)).text,
+					`${index}: popover`,
 				).toBeGreaterThanOrEqual(4.5);
+				for (const label of await panel.locator('label').all()) {
+					expect(
+						(await measurements(label)).text,
+						`${index}: label`,
+					).toBeGreaterThanOrEqual(4.5);
+				}
+				await panel.locator('label').first().hover();
+				expect(
+					(await measurements(panel.locator('label').first())).text,
+					`${index}: hover`,
+				).toBeGreaterThanOrEqual(4.5);
+				await page.keyboard.press('Escape');
 			}
-			await panel.locator('label').first().hover();
-			expect(
-				(await measurements(panel.locator('label').first())).text,
-				`${index}: hover`,
-			).toBeGreaterThanOrEqual(4.5);
-			await page.keyboard.press('Escape');
 		}
-	}
-});
+	});
+}
 
 test('author stylesheet hooks change the actual top-layer colors', async ({
 	page,
@@ -399,7 +424,8 @@ test('native keyboard popover controls preserve data, focus and a last selectabl
 	await page.keyboard.press(tabKey);
 	const first = host.getByRole('checkbox', { name: 'Name', exact: true });
 	await expect(first).toBeFocused();
-	await expect(first).toHaveCSS('outline-style', 'auto');
+	await expect(first).toHaveCSS('outline-style', 'solid');
+	await expect(first).toHaveCSS('outline-width', '3px');
 	await page.keyboard.press('Space');
 	await expect(first).not.toBeChecked();
 	await expect(host.locator('thead th').first()).toBeHidden();
@@ -525,7 +551,8 @@ test('forced colors retain native focus, checkbox state and automatic adjustment
 	const box = host.getByRole('checkbox').first();
 	await box.focus();
 	await expect(box).toBeChecked();
-	await expect(box).toHaveCSS('outline-style', 'auto');
+	await expect(box).toHaveCSS('outline-style', 'solid');
+	await expect(box).toHaveCSS('outline-width', '3px');
 	await expect(box).toHaveCSS('forced-color-adjust', 'auto');
 	await page.keyboard.press('Space');
 	await expect(box).not.toBeChecked();
@@ -551,7 +578,7 @@ for (const name of ['index.html', 'esm.html', 'unpkg.html']) {
 		await expect(page.locator('.code-demo-pair').first()).toBeVisible();
 		for (const pair of await page.locator('.code-demo-pair').all()) {
 			await expect(pair.locator(':scope > *')).toHaveCount(2);
-			await expect(pair.locator(':scope > pre')).toHaveCount(1);
+			await expect(pair.locator(':scope > micro-lighter')).toHaveCount(1);
 			await expect(pair.locator(':scope > .demo')).toHaveCount(1);
 		}
 		for (const width of [1400, 1024, 768, 320]) {
@@ -617,6 +644,10 @@ for (const name of ['index.html', 'esm.html', 'unpkg.html']) {
 				javaScriptEnabled: failure !== 'no JavaScript',
 				viewport: { width: 320, height: 900 },
 			});
+			await context.route(
+				'https://cdn.jsdelivr.net/npm/microlighter@2.2.0/dist/**',
+				(route) => route.abort(),
+			);
 			try {
 				const page = await context.newPage();
 				await page.route(/(\.js(\?|$)|esm\.sh|unpkg\.com)/, (route) =>
