@@ -3,6 +3,13 @@ import { expect, it } from 'vitest';
 
 const read = (path) => readFile(new URL(path, import.meta.url), 'utf8');
 
+it('trims block-edge margins inside demo sections', async () => {
+	const styles = await read('../demo/demo-shell.css');
+	expect(styles).toMatch(
+		/\.demo-section(?:,\s*\.api-reference)?\s*\{[^}]*\bmargin-trim:\s*block;/,
+	);
+});
+
 it('documents constructor reuse restrictions for registration helpers', async () => {
 	const manifest = JSON.parse(await read('../custom-elements.json'));
 	const helpers = manifest.modules.find(
