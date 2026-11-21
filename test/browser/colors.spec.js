@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { test, expect } from '@playwright/test';
+import { expectNativeFocus } from './demo-fixture.js';
 
 test.beforeEach(async ({ page }) => {
 	await page.route(
@@ -424,8 +425,7 @@ test('native keyboard popover controls preserve data, focus and a last selectabl
 	await page.keyboard.press(tabKey);
 	const first = host.getByRole('checkbox', { name: 'Name', exact: true });
 	await expect(first).toBeFocused();
-	await expect(first).toHaveCSS('outline-style', 'solid');
-	await expect(first).toHaveCSS('outline-width', '3px');
+	await expectNativeFocus(first);
 	await page.keyboard.press('Space');
 	await expect(first).not.toBeChecked();
 	await expect(host.locator('thead th').first()).toBeHidden();
@@ -551,8 +551,7 @@ test('forced colors retain native focus, checkbox state and automatic adjustment
 	const box = host.getByRole('checkbox').first();
 	await box.focus();
 	await expect(box).toBeChecked();
-	await expect(box).toHaveCSS('outline-style', 'solid');
-	await expect(box).toHaveCSS('outline-width', '3px');
+	await expectNativeFocus(box);
 	await expect(box).toHaveCSS('forced-color-adjust', 'auto');
 	await page.keyboard.press('Space');
 	await expect(box).not.toBeChecked();
@@ -588,10 +587,15 @@ for (const name of ['index.html', 'esm.html', 'unpkg.html']) {
 					() => document.documentElement.scrollWidth > innerWidth,
 				),
 			).toBe(false);
-			await expect(page.locator('.code-demo-pair').first()).toHaveCSS(
-				'flex-direction',
-				width < 768 ? 'column' : 'row',
-			);
+			const pair = page.locator('.code-demo-pair').first();
+			await expect(pair).toHaveCSS('display', 'grid');
+			expect(
+				await pair.evaluate(
+					(pair) =>
+						getComputedStyle(pair).gridTemplateColumns.split(' ')
+							.length,
+				),
+			).toBe(width < 768 ? 1 : 2);
 			if (width === 1400)
 				for (const host of await page.locator('table-modifiable').all())
 					expect(
