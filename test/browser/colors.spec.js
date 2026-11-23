@@ -457,7 +457,7 @@ test('localized custom controls keep translated names and descriptions', async (
 	page,
 }) => {
 	await demo(page);
-	const host = page.locator('table-modifiable[lang="fr"]');
+	const host = page.locator('#french-labels table-modifiable');
 	const button = host.getByRole('button', {
 		name: 'Choisir les colonnes du personnel',
 		exact: true,
@@ -483,7 +483,7 @@ test('short localized checkbox labels fit at 320px with enlarged text', async ({
 	await page.setViewportSize({ width: 320, height: 900 });
 	await demo(page);
 	await page.addStyleTag({ content: ':root { font-size: 200%; }' });
-	const host = page.locator('table-modifiable[lang="fr"]');
+	const host = page.locator('#french-labels table-modifiable');
 	await host.locator('button').click();
 	for (const family of ['inherit', 'monospace']) {
 		await host.evaluate((host, family) => {
@@ -511,6 +511,10 @@ test('events report literal column text and the demo log stays bounded', async (
 	page,
 }) => {
 	await demo(page);
+	await expect(page.locator('#column-events .code-panel code')).toContainText(
+		'id="event-log"',
+	);
+	await expect(page.locator('#event-log pre')).toHaveCount(0);
 	const host = page.locator('#event-demo');
 	await host.locator('button').click();
 	const box = host.getByRole('checkbox').first();
@@ -534,6 +538,51 @@ test('events report literal column text and the demo log stays bounded', async (
 	await expect(page.locator('.event-log img')).toHaveCount(0);
 	await expect(page.locator('.event-log pre')).toHaveCount(5);
 });
+
+for (const [name, destinations] of Object.entries({
+	'index.html': [
+		'basic-usage',
+		'initial-columns',
+		'french-labels',
+		'column-events',
+		'custom-palette',
+	],
+	'esm.html': ['class-only-import'],
+	'unpkg.html': ['automatic-registration'],
+})) {
+	test(`${name}: each example has a unique fragment destination`, async ({
+		page,
+	}) => {
+		await demo(page, name);
+		const ids = await page
+			.locator('[id]')
+			.evaluateAll((nodes) => nodes.map((node) => node.id));
+		expect(new Set(ids).size).toBe(ids.length);
+		for (const destination of destinations) {
+			const block = page.locator(`#${destination}`);
+			await expect(block.locator(':scope > h2, :scope > h3')).toHaveCount(
+				1,
+			);
+			await expect(block.locator('.code-demo-pair')).toHaveCount(1);
+			await page.goto(`/demo/${name}#${destination}`);
+			await expect(block).toBeInViewport();
+			expect(
+				await block.evaluate(
+					(node) => document.querySelector(location.hash) === node,
+				),
+			).toBe(true);
+		}
+		for (const pair of await page.locator('.code-demo-pair').all())
+			expect(
+				await pair.evaluate((pair, destinations) => {
+					const block = pair.closest(
+						'section[id], .demo-section[id]',
+					);
+					return block && destinations.includes(block.id);
+				}, destinations),
+			).toBe(true);
+	});
+}
 
 test('forced colors retain native focus, checkbox state and automatic adjustment', async ({
 	page,

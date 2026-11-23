@@ -39,11 +39,17 @@
 				hidden
 			></p>
 
-			<section class="demo-section">
+			<section id="automatic-registration" class="demo-section">
 				<h2>Automatic registration</h2>
 				<p>
 					This page loads the guarded definition helper from
-					<code>unpkg</code> and registers the element when supported.
+					<code>unpkg</code>. Importing
+					<code>define.js</code> registers the default tag
+					automatically. The package root and
+					<code>table-modifiable.js</code> instead export only the
+					class; see the
+					<a href="./esm.html#class-only-import">esm.sh example</a>
+					for manual registration.
 				</p>
 				<p>
 					Importing the helper already registers the default tag; the
