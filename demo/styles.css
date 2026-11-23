@@ -130,7 +130,7 @@ tbody tr:nth-child(even) > td {
 	overflow: auto;
 }
 
-.event-log h4 {
+.event-log h3 {
 	margin-block-start: 0;
 }
 

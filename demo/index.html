@@ -13,8 +13,8 @@
 			<p class="eyebrow">Web component / Examples</p>
 			<h1>&lt;table-modifiable&gt;</h1>
 			<p class="lede">
-				A web component that enables users to hide & show columns on an
-				HTML table. See the
+				Let people choose which columns to read in a native HTML table.
+				See the
 				<a href="../README.md">README</a>
 				for installation and API documentation.
 			</p>
@@ -43,21 +43,31 @@
 			></p>
 
 			<p class="note">
-				Each table keeps its data before JavaScript loads or if the
-				module fails. Enhancement adds a native popover with labeled
-				checkboxes; at least one selectable column stays visible. Focus
-				a table region and use the arrow keys to scroll wider data.
+				Without JavaScript or if the component module fails to load,
+				every authored column stays readable. Enhancement adds a button
+				and native popover with labeled checkboxes. Focus a table region
+				and use the arrow keys to scroll wider data.
 			</p>
 			<!-- Basic Example -->
-			<section>
-				<h2>Basic Example</h2>
+			<section id="basic-usage">
+				<h2>Choose visible columns</h2>
 				<p>
-					A simple table with removable columns. By default, all
-					removable columns are shown.
+					Wrap a simple table in <code>&lt;table-modifiable&gt;</code>
+					and list the headers people can toggle in
+					<code>removable</code>. Names must match the first header
+					row’s trimmed text exactly, including case. Use unique names
+					and matching body cells, without <code>colspan</code> or
+					<code>rowspan</code>.
+				</p>
+				<p>
+					All columns start visible here. Open “Modify Table,” use Tab
+					to reach a checkbox, and press Space to hide or show its
+					column. The component rejects unchecking the last checked
+					checkbox. Press Escape to close the popover and return focus
+					from its controls to the button.
 				</p>
 
 				<div class="demo-section">
-					<h3>Basic Usage</h3>
 					<div class="code-demo-pair">
 						<micro-lighter
 							class="code-panel"
@@ -89,6 +99,11 @@
         &lt;td&gt;Jane Smith&lt;/td&gt;
         &lt;td&gt;jane@example.com&lt;/td&gt;
         &lt;td&gt;555-5678&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;Bob Johnson&lt;/td&gt;
+        &lt;td&gt;bob@example.com&lt;/td&gt;
+        &lt;td&gt;555-9012&lt;/td&gt;
       &lt;/tr&gt;
     &lt;/tbody&gt;
   &lt;/table&gt;
@@ -137,15 +152,28 @@
 			</section>
 
 			<!-- Example with start-with -->
-			<section>
-				<h2>Initial Column Visibility</h2>
+			<section id="initial-columns">
+				<h2>Start with fewer columns</h2>
 				<p>
-					Use the <code>start-with</code> attribute to specify which
-					columns should be visible initially.
+					Set <code>start-with="Product,Price"</code> to show only
+					those removable columns after enhancement. Stock, Category,
+					and Supplier remain available in the popover. Without
+					JavaScript, all five columns stay visible.
+				</p>
+				<p>
+					Choose at least one valid removable header name. The
+					last-checkbox safeguard applies to user changes, not initial
+					configuration: an unmatched
+					<code>start-with</code> list can hide every removable
+					column. Hiding changes presentation, not access to data, and
+					doesn’t hide footer cells. See
+					<a href="../README.md#table-requirements-and-behavior"
+						>table requirements and behavior</a
+					>
+					for the full rules.
 				</p>
 
 				<div class="demo-section">
-					<h3>Hiding Columns by Default</h3>
 					<div class="code-demo-pair">
 						<micro-lighter
 							class="code-panel"
@@ -218,22 +246,20 @@
 			</section>
 
 			<!-- Custom Labels Example -->
-			<section>
-				<h2>Localized Labels and a Custom Palette</h2>
+			<section id="french-labels">
+				<h2>Rewrite or translate labels</h2>
 				<p>
-					Customize the button and popover labels using the
+					Match your application’s vocabulary or translate the button
+					and panel labels using the
 					<code>button-label</code>, <code>button-aria-label</code>,
-					and <code>tools-label</code> attributes. Column names come
-					from your table. The shared author stylesheet uses
-					<code>--table-modifiable-tool-bg</code> and
-					<code>--table-modifiable-tool-color</code> together for the
-					popover; the component itself injects no colors or CSS. This
-					example retains the blue control theme with an explicit
-					light popover pair and French text.
+					and <code>tools-label</code> attributes. Here, the longer
+					button name includes the visible “Choisir les colonnes”
+					label. Translate the headers, caption, and region name too,
+					and keep both column lists matched to the headers.
+					<code>lang="fr"</code> identifies the French content.
 				</p>
 
 				<div class="demo-section">
-					<h3>Customized Interface</h3>
 					<div class="code-demo-pair">
 						<micro-lighter
 							class="code-panel"
@@ -244,18 +270,7 @@
 							<pre
 								aria-label="Customized Interface code 3"
 								tabindex="0"
-							><code>&lt;style&gt;
-.custom-controls {
-  <mark>--table-modifiable-tool-bg</mark>: #fff;
-  <mark>--table-modifiable-tool-color</mark>: #333;
-  color-scheme: light;
-}
-.custom-controls .modification-tools-toggle {
-  background: #0969da;
-  color: #fff;
-}
-&lt;/style&gt;
-<mark>&lt;table-modifiable class="custom-controls" lang="fr"
+							><code><mark>&lt;table-modifiable lang="fr"
   removable="Nom,Courriel,Téléphone,Adresse"
   start-with="Nom,Courriel"
   button-label="Choisir les colonnes"
@@ -270,7 +285,6 @@
 						</micro-lighter>
 						<div class="demo" data-demo-label="Live example">
 							<table-modifiable
-								class="custom-controls"
 								lang="fr"
 								removable="Nom,Courriel,Téléphone,Adresse"
 								start-with="Nom,Courriel"
@@ -321,15 +335,18 @@
 			</section>
 
 			<!-- Events Example -->
-			<section>
-				<h2>Event Handling</h2>
+			<section id="column-events">
+				<h2>Respond to column changes</h2>
 				<p>
 					Listen to the <code>table-modifiable:change</code> event to
-					be notified when columns are toggled.
+					record accepted checkbox changes. This log keeps the last
+					five events and displays column text as text, not HTML.
+					Initial hiding, rebuilds, and rejected attempts to uncheck
+					the last checked checkbox don’t emit events. See the
+					<a href="../README.md#events">event reference</a>.
 				</p>
 
 				<div class="demo-section">
-					<h3>Event Listener Demo</h3>
 					<div class="code-demo-pair">
 						<micro-lighter
 							class="code-panel"
@@ -347,11 +364,30 @@
   &lt;!-- table --&gt;
 <mark>&lt;/table-modifiable&gt;</mark>
 
+&lt;div class="event-log" id="event-log"&gt;
+  &lt;h3&gt;Event Log&lt;/h3&gt;
+  &lt;p&gt;Toggle columns above to see events:&lt;/p&gt;
+&lt;/div&gt;
+
 &lt;script&gt;
-document.querySelector('#event-demo')
-  .addEventListener(<mark>'table-modifiable:change'</mark>, (e) => {
-    console.log(<mark>e.detail</mark>);
+const eventDemo = document.querySelector('#event-demo');
+const eventLog = document.querySelector('#event-log');
+
+if (eventDemo &amp;&amp; eventLog) {
+  eventDemo.addEventListener(<mark>'table-modifiable:change'</mark>, (event) => {
+    const pre = document.createElement('pre');
+    pre.textContent = JSON.stringify({
+      column: <mark>event.detail.column</mark>,
+      visible: <mark>event.detail.visible</mark>,
+      timestamp: new Date().toLocaleTimeString(),
+    }, null, 2);
+    eventLog.appendChild(pre);
+
+    // Keep only last 5 events
+    const pres = eventLog.querySelectorAll('pre');
+    if (pres.length &gt; 5) pres[0].remove();
   });
+}
 &lt;/script&gt;</code></pre>
 						</micro-lighter>
 						<div class="demo" data-demo-label="Live example">
@@ -394,10 +430,112 @@ document.querySelector('#event-demo')
 							</table-modifiable>
 
 							<div class="event-log" id="event-log">
-								<h4>Event Log</h4>
+								<h3>Event Log</h3>
 								<p>Toggle columns above to see events:</p>
 							</div>
 						</div>
+					</div>
+				</div>
+			</section>
+
+			<section id="custom-palette" class="demo-section">
+				<h2>Add an optional palette</h2>
+				<p>
+					These are the same French labels with a blue button and a
+					light popover. Set foreground and background together.
+					Changing labels doesn’t require changing colors.
+				</p>
+				<p>
+					The component injects no CSS. The custom properties below
+					work because <a href="./styles.css">this page’s CSS</a>
+					consumes them. See the
+					<a href="../README.md#styling">styling reference</a>
+					for the control selectors and a complete stylesheet.
+				</p>
+				<div class="code-demo-pair">
+					<micro-lighter
+						class="code-panel"
+						language="html"
+						controls="copy"
+						data-label="HTML"
+					>
+						<pre
+							aria-label="Custom palette code"
+							tabindex="0"
+						><code>&lt;style&gt;
+.custom-controls {
+  <mark>--table-modifiable-tool-bg</mark>: #fff;
+  <mark>--table-modifiable-tool-color</mark>: #333;
+  color-scheme: light;
+}
+.custom-controls .modification-tools-toggle {
+  background: #0969da;
+  color: #fff;
+}
+.custom-controls .modification-tools-toggle:hover {
+  background: #0860ca;
+}
+&lt;/style&gt;
+<mark>&lt;table-modifiable class="custom-controls" lang="fr"
+  removable="Nom,Courriel,Téléphone,Adresse"
+  start-with="Nom,Courriel"
+  button-label="Choisir les colonnes"
+  button-aria-label="Choisir les colonnes du personnel"
+  tools-label="Colonnes à afficher"
+  role="region" aria-label="Tableau du personnel" tabindex="0"&gt;</mark>
+  &lt;table&gt;
+    &lt;caption&gt;Coordonnées du personnel&lt;/caption&gt;
+    &lt;!-- same French table as above --&gt;
+  &lt;/table&gt;
+<mark>&lt;/table-modifiable&gt;</mark></code></pre>
+					</micro-lighter>
+					<div class="demo" data-demo-label="Live example">
+						<table-modifiable
+							class="custom-controls"
+							lang="fr"
+							removable="Nom,Courriel,Téléphone,Adresse"
+							start-with="Nom,Courriel"
+							button-label="Choisir les colonnes"
+							button-aria-label="Choisir les colonnes du personnel"
+							tools-label="Colonnes à afficher"
+							role="region"
+							aria-label="Tableau du personnel"
+							tabindex="0"
+						>
+							<table>
+								<caption>
+									Coordonnées du personnel
+								</caption>
+								<thead>
+									<tr>
+										<th>Nom</th>
+										<th>Courriel</th>
+										<th>Téléphone</th>
+										<th>Adresse</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>Alice Anderson</td>
+										<td>alice@example.com</td>
+										<td>555-0101</td>
+										<td>123 Oak St</td>
+									</tr>
+									<tr>
+										<td>Bob Brown</td>
+										<td>bob@example.com</td>
+										<td>555-0202</td>
+										<td>456 Pine Ave</td>
+									</tr>
+									<tr>
+										<td>Carol Clark</td>
+										<td>carol@example.com</td>
+										<td>555-0303</td>
+										<td>789 Elm Rd</td>
+									</tr>
+								</tbody>
+							</table>
+						</table-modifiable>
 					</div>
 				</div>
 			</section>

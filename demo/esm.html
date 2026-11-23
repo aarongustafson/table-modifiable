@@ -39,11 +39,16 @@
 				hidden
 			></p>
 
-			<section class="demo-section">
+			<section id="class-only-import" class="demo-section">
 				<h2>Class-only import</h2>
 				<p>
 					This page loads the component class from
-					<code>esm.sh</code> and registers it manually.
+					<code>esm.sh</code> and registers it manually. The package
+					root and <code>table-modifiable.js</code> export the class
+					without registering it; unlike the
+					<a href="./unpkg.html#automatic-registration"
+						>definition-module example</a
+					>, this import needs <code>customElements.define()</code>.
 				</p>
 				<p>
 					All columns remain readable before enhancement or if loading
@@ -64,7 +69,9 @@
 						><code>&lt;script type="module"&gt;
 <mark>import { TableModifiableElement } from
   'https://esm.sh/@aarongustafson/table-modifiable@1.1.3/table-modifiable.js?bundle&amp;target=es2022';</mark>
-<mark>customElements.define('table-modifiable', TableModifiableElement);</mark>
+if (!customElements.get('table-modifiable')) {
+  <mark>customElements.define('table-modifiable', TableModifiableElement);</mark>
+}
 &lt;/script&gt;
 
 <mark>&lt;table-modifiable removable="Name,Email,Phone"
